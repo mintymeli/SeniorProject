@@ -49,3 +49,11 @@ async function analyzeEmail(messageId) {
 chrome.runtime.onInstalled.addListener(() => {
   console.log("PhishCatcher Extension successfully installed!");
 });
+
+// UPDATE CHANGE
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "ANALYZE_EMAIL") {
+    console.log("Received Gmail API message ID:", message.messageId);
+    analyzeEmail(message.messageId);
+  }
+});

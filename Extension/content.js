@@ -40,6 +40,13 @@ function getCurrentEmailId() {
 
     if (messageId) {
       console.log("PhishCatcher found Gmail API message ID:", messageId);
+
+      // UPDATE CHANGE
+      chrome.runtime.sendMessage({
+      action: "ANALYZE_EMAIL",
+      messageId: messageId
+      });
+
       return;
     }
   }

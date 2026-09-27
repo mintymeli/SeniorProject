@@ -28,6 +28,7 @@ async def analyze_email(request: Request):
     # 4. Print them beautifully directly into your terminal/command line
     print("\n" + "="*50)
     print("📥 [NEW EMAIL RECEIVED FROM EXTENSION]")
+    print(f"🆔 MESSAGE ID: {email_json.get('id')}")
     print(f"👤 SENDER:  {email_sender}")
     print(f"📧 SUBJECT: {email_subject}")
     print(f"📅 DATE:    {email_date}")
