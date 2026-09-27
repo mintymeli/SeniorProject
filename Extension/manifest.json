@@ -17,6 +17,12 @@
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://google.com*"],
+      "js": ["content.js"]
+    }
+  ],
   "oauth2": {
     "client_id": "284386632337-no066nve6okfp42brciil5e4uqqa6d2r.apps.googleusercontent.com",
     "scopes": [
