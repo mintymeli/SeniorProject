@@ -2,7 +2,6 @@
 // console.log("PhishCatcher content.js is running!");
 
 // PhishCatcher Content Script
-
 /**
 function checkCurrentEmail() {
   console.log("Checking current Gmail page...");
