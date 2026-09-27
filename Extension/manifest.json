@@ -18,9 +18,9 @@
     "service_worker": "background.js"
   },
   "oauth2": {
-    "client_id": "284386632337-ij6r4jt1epr5cj16dcdflc62jg21aa5k.apps.googleusercontent.com",
+    "client_id": "284386632337-no066nve6okfp42brciil5e4uqqa6d2r.apps.googleusercontent.com",
     "scopes": [
-      "https://googleapis.com"
+      "https://www.googleapis.com/auth/gmail.readonly"
     ]
   }
 }

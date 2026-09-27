@@ -1,0 +1,21 @@
+[project]
+name = "extension"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "aolvera3", email = "a_olvera3@u.pacific.edu" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "beautifulsoup4>=4.15.0",
+    "fastapi>=0.141.1",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+extension = "extension:main"
+
+[build-system]
+requires = ["uv_build>=0.12.19,<0.13.0"]
+build-backend = "uv_build"
