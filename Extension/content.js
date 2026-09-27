@@ -55,6 +55,8 @@ function getCurrentEmailId() {
   setTimeout(getCurrentEmailId, 1000);
 }
 
+getCurrentEmailId();
+
 // Analyze Email Button Tester (it's a work in progress)
 
   // analyze email button 
