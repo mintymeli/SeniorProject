@@ -31,6 +31,8 @@ checkCurrentEmail();
 */
 
 // Testing data-legacy-message-id
+// PhishCatcher Content Script
+
 function getCurrentEmailId() {
   const emailElement = document.querySelector('div.adn');
 
@@ -39,17 +41,12 @@ function getCurrentEmailId() {
 
     if (messageId) {
       console.log("PhishCatcher found Gmail API message ID:", messageId);
-
-      chrome.runtime.sendMessage({
-        action: "ANALYZE_EMAIL",
-        messageId: messageId
-      });
-
       return;
     }
   }
 
-  console.log("No open email found.");
+  console.log("Email not ready yet. Checking again...");
+  setTimeout(getCurrentEmailId, 1000);
 }
 
 getCurrentEmailId();
