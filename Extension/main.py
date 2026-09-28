@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# Allows your Chrome Extension to talk to your local backend server
+# Allows Chrome Extension to talk to local backend server
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -25,13 +25,13 @@ async def analyze_email(request: Request):
     email_sender = next((h['value'] for h in headers if h['name'].lower() == 'from'), "Unknown Sender")
     email_date = next((h['value'] for h in headers if h['name'].lower() == 'date'), "No Date")
     
-    # 4. Print them beautifully directly into your terminal/command line
+    # 4. Print headers to terminal
     print("\n" + "="*50)
-    print("📥 [NEW EMAIL RECEIVED FROM EXTENSION]")
-    print(f"🆔 MESSAGE ID: {email_json.get('id')}")
-    print(f"👤 SENDER:  {email_sender}")
-    print(f"📧 SUBJECT: {email_subject}")
-    print(f"📅 DATE:    {email_date}")
+    print("[NEW EMAIL RECEIVED FROM EXTENSION]")
+    print(f"MESSAGE ID: {email_json.get('id')}")
+    print(f"SENDER:  {email_sender}")
+    print(f"SUBJECT: {email_subject}")
+    print(f"DATE:    {email_date}")
     print("="*50 + "\n")
     
     # 5. Send a quick success message back to the Chrome Extension

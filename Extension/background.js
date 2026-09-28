@@ -1,6 +1,6 @@
 // PhishCatcher Background Service Worker
 
-// Function to log the user in and get their Google OAuth Access Token
+// Function to log user in and get their Google OAuth Access Token
 function getAuthToken() {
   return new Promise((resolve, reject) => {
     chrome.identity.getAuthToken({ interactive: true }, function(token) {
@@ -13,7 +13,7 @@ function getAuthToken() {
   });
 }
 
-// Function to fetch email payload using token and send it to your backend
+// Function to fetch email payload using token and send it to backend
 async function analyzeEmail(messageId) {
   try {
     console.log("Fetching authentication token...");
@@ -29,7 +29,7 @@ async function analyzeEmail(messageId) {
     });
     const emailData = await response.json();
 
-    // POST the email JSON data directly to your local Python FastAPI server
+    // POST the email JSON data directly to local Python FastAPI server
     console.log("Forwarding email data to PhishCatcher backend...");
     const backendResponse = await fetch('http://127.0.0.1:8000/analyze', {
       method: 'POST',
