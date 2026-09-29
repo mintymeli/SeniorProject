@@ -55,7 +55,7 @@ function getCurrentEmailId() {
   setTimeout(getCurrentEmailId, 1000);
 }
 
-getCurrentEmailId();
+//getCurrentEmailId();
 
 // Analyze Email Button Tester (it's a work in progress)
 
@@ -98,10 +98,12 @@ getCurrentEmailId();
 
     const emailElement = document.querySelector('div.adn');
 
-    if (!emailElement) {
-      alert("Open an email first.");
+   if (!emailElement) {
+     alert("Open an email first.");
       return;
     }
+
+   //const messageId = getCurrentEmailId();
 
     const messageId =
       emailElement.getAttribute("data-legacy-message-id");
