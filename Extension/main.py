@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware 
+import base64
 
 app = FastAPI()
 
@@ -11,6 +12,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Extracts the email body
+def extract_email_body(payload):
+
+     # Get the body data from the email
+    body_data = payload.get("body", {}).get("data")
+
+    if body_data:
+        return body_data
+
+     # Check each part of the email for the body
+    for part in payload.get("parts", []):
+        body = extract_email_body(part)
+
+        if body:
+            return body
+
+    # Return an empty value if no body was found
+    return ""
 
 @app.post("/analyze")
 async def analyze_email(request: Request):
@@ -24,6 +44,24 @@ async def analyze_email(request: Request):
     email_subject = next((h['value'] for h in headers if h['name'].lower() == 'subject'), "No Subject")
     email_sender = next((h['value'] for h in headers if h['name'].lower() == 'from'), "Unknown Sender")
     email_date = next((h['value'] for h in headers if h['name'].lower() == 'date'), "No Date")
+
+    # Extracts the email body
+    email_body = extract_email_body(email_json.get ('payload', {}))
+
+    # Decodes the Base64URL encoded body
+    if email_body:
+
+        try:
+            decoded_body = base64.urlsafe_b64decode(
+                email_body + "=="
+            ).decode("utf-8", errors="replace")
+
+        except Exception as error:
+            print("Could not decode email body:", error)
+            decoded_body = "Could not decode email body."
+
+    else:
+        decoded_body = "No email body found."
     
     # 4. Print headers to terminal
     print("\n" + "="*50)
@@ -32,6 +70,11 @@ async def analyze_email(request: Request):
     print(f"SENDER:  {email_sender}")
     print(f"SUBJECT: {email_subject}")
     print(f"DATE:    {email_date}")
+
+    # Print the decoded email body
+    print("BODY:")
+    print()
+    print(decoded_body)
     print("="*50 + "\n")
     
     # 5. Send a quick success message back to the Chrome Extension
