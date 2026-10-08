@@ -39,14 +39,41 @@ async def analyze_email(request: Request):
     
     # 2. Navigate to where Google stores headers inside the JSON
     headers = email_json.get('payload', {}).get('headers', [])
-    
+
+
+    '''
     # 3. Pull out the specific headers we want to read
     email_subject = next((h['value'] for h in headers if h['name'].lower() == 'subject'), "No Subject")
     email_sender = next((h['value'] for h in headers if h['name'].lower() == 'from'), "Unknown Sender")
     email_date = next((h['value'] for h in headers if h['name'].lower() == 'date'), "No Date")
+    '''
 
     # Extracts the email body
     email_body = extract_email_body(email_json.get ('payload', {}))
+    
+    # UPDATE: Organize the headers by name for easier lookup
+    header_map = {
+        h["name"].lower(): h["value"]
+        for h in headers
+        if "name" in h and "value" in h
+    }
+    # Extract basic email information
+    email_subject = header_map.get("subject", "No Subject")
+    email_sender = header_map.get("from", "Unknown Sender")
+    email_date = header_map.get("date", "No Date")
+
+    # Extract security-relevant headers
+    email_reply_to = header_map.get("reply-to", "Not provided")
+    email_return_path = header_map.get("return-path", "Not provided")
+    email_received = [
+        h["value"] for h in headers
+        if h.get("name", "").lower() == "received"
+    ]
+    email_auth_results = [
+        h["value"] for h in headers
+        if h.get("name", "").lower() == "authentication-results"
+    ]
+    email_message_id = header_map.get("message-id", "Not provided")
 
     # Decodes the Base64URL encoded body
     if email_body:
@@ -70,6 +97,19 @@ async def analyze_email(request: Request):
     print(f"SENDER:  {email_sender}")
     print(f"SUBJECT: {email_subject}")
     print(f"DATE:    {email_date}")
+
+    # UPDATE: Print extra headers
+    print(f"🐟 REPLY-TO: {email_reply_to}")
+    print(f"🐟 RETURN-PATH: {email_return_path}")
+    print(f"🐟 MESSAGE-ID HEADER: {email_message_id}")
+
+    print("🐟 RECEIVED HEADERS:")
+    for value in email_received:
+        print(value)
+
+    print("🐟 AUTHENTICATION RESULTS:")
+    for value in email_auth_results:
+        print(value)
 
     # Print the decoded email body
     print("BODY:")
