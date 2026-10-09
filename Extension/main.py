@@ -124,7 +124,7 @@ async def analyze_email(request: Request):
         print(value)
 
     # Prints URLs
-    print("🐟 LINK ANALYSIS:")
+    print("🐟 LINK RESULTS:")
 
     if email_urls: 
         for url in email_urls:
