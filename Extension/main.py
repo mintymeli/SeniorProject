@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware 
 import base64
+import re 
 
 app = FastAPI()
 
@@ -31,6 +32,15 @@ def extract_email_body(payload):
 
     # Return an empty value if no body was found
     return ""
+
+# Extracts URLs from the email body
+def extract_urls(email_body): 
+
+    # Finds URLs that start with http:// or https://
+    urls = re.findall(r'https?://[^\s<>"\']+', email_body)
+
+    # Removes duplicate URLs
+    return list(dict.fromkeys(urls))
 
 @app.post("/analyze")
 async def analyze_email(request: Request):
@@ -89,6 +99,8 @@ async def analyze_email(request: Request):
 
     else:
         decoded_body = "No email body found."
+
+    email_urls = extract_urls(decoded_body)
     
     # 4. Print headers to terminal
     print("\n" + "="*50)
@@ -111,12 +123,25 @@ async def analyze_email(request: Request):
     for value in email_auth_results:
         print(value)
 
+    # Prints URLs
+    print("🐟 LINK ANALYSIS:")
+
+    if email_urls: 
+        for url in email_urls:
+            print(f"URL: {url}")
+
+            print()
+    else:
+        print("No URLs found.")
+
+        print()
+
     # Print the decoded email body
-    print("BODY:")
+    print("🐟 BODY:")
     print()
     print(decoded_body)
     print("="*50 + "\n")
-    
+
     # 5. Send a quick success message back to the Chrome Extension
     return {
         "status": "Success",
