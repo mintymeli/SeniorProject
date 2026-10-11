@@ -10,10 +10,32 @@ MODEL_NAME = "cybersectony/phishing-email-detection-distilbert_v2.4.1"
 # 0 legitimate_email, 1 phishing_url, 2 legitimate_url, 3 phishing_url_alt
 PHISHING_INDICES = [1, 3]
 
-URGENCY_PHRASES = [
-    "act now", "immediately", "urgent", "account suspended",
-    "verify your", "within 24 hours", "final notice", "limited",
+# Urgency is matched as phrases in context, not single words. "immediately" alone
+# also appears in normal mail ("book signing immediately following the keynote"),
+# so we look for pressure to act: "verify immediately", "within 24 hours", etc.
+URGENCY_PATTERNS = [
+    r"\bact now\b",
+    r"\b(respond|reply|act|verify|confirm|update|click|call|pay|send)\b[^.!?\n]{0,30}\b(immediately|right away|asap|now)\b",
+    r"\bas soon as you (see|get|read) this\b",
+    r"\burgent(ly)?\b",
+    r"\bimmediate (action|attention|response)\b",
+    r"\baccount (will be |has been |is )?(permanently )?(suspended|closed|locked|limited|disabled|terminated)\b",
+    r"\bverify your (account|identity|password|email|information|details)\b",
+    r"\bwithin (12|24|48|72) hours\b",
+    r"\bfinal (notice|warning)\b",
+    r"\b(failure to|if you do not|unless you) (act|respond|verify|confirm|comply)\b",
 ]
+
+
+def find_urgency(text: str) -> list[str]:
+    """Returns the urgency phrases found in already-lowercased text."""
+    hits = []
+    for pattern in URGENCY_PATTERNS:
+        match = re.search(pattern, text)
+        if match:
+            hits.append(match.group(0))
+    return hits
+
 
 GENERIC_GREETING = re.compile(
     r"\b(dear (customer|user|member|client|valued customer|account holder)|valued customer|hello (customer|user))\b",
@@ -83,8 +105,9 @@ class BodyAnalyzer:
 
         score = self.phishing_probability(body)
         lowered = clean_body(body).lower()
+        urgency_hits = find_urgency(lowered)
         has_rule_hit = (
-            any(p in lowered for p in URGENCY_PHRASES)
+            bool(urgency_hits)
             or any(p in lowered for p in SENSITIVE_PHRASES)
             or bool(GENERIC_GREETING.search(lowered))
         )
@@ -105,7 +128,7 @@ class BodyAnalyzer:
                     "severity": "Low",
                 })
 
-        hits = [p for p in URGENCY_PHRASES if p in lowered]
+        hits = urgency_hits
         if hits:
             findings.append({
                 "type": "Urgency Language",

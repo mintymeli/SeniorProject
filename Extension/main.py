@@ -151,7 +151,7 @@ async def analyze_email(request: Request):
         for finding in body_findings:
             print(f"[{finding['severity']}] {finding['type']}: {finding['description']}")
     else:
-        print("No body findings.")
+        print("No warning signs found in the message wording.")
     print()
 
     # Print the decoded email body
