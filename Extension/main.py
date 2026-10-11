@@ -3,7 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 import base64
 import re 
 
+from body_classifier import BodyAnalyzer
+
 app = FastAPI()
+
+body_analyzer = BodyAnalyzer()
 
 # Allows Chrome Extension to talk to local backend server
 app.add_middleware(
@@ -86,12 +90,16 @@ async def analyze_email(request: Request):
     email_message_id = header_map.get("message-id", "Not provided")
 
     # Decodes the Base64URL encoded body
+    body_decoded_ok = False 
+
+    # Decodes the Base64URL encoded body
     if email_body:
 
         try:
             decoded_body = base64.urlsafe_b64decode(
                 email_body + "=="
             ).decode("utf-8", errors="replace")
+            body_decoded_ok = True
 
         except Exception as error:
             print("Could not decode email body:", error)
@@ -101,6 +109,8 @@ async def analyze_email(request: Request):
         decoded_body = "No email body found."
 
     email_urls = extract_urls(decoded_body)
+
+    body_findings = body_analyzer.analyze(decoded_body) if body_decoded_ok else []
     
     # 4. Print headers to terminal
     print("\n" + "="*50)
@@ -136,6 +146,14 @@ async def analyze_email(request: Request):
 
         print()
 
+    print("🐟 BODY ANALYSIS:")
+    if body_findings:
+        for finding in body_findings:
+            print(f"[{finding['severity']}] {finding['type']}: {finding['description']}")
+    else:
+        print("No body findings.")
+    print()
+
     # Print the decoded email body
     print("🐟 BODY:")
     print()
@@ -145,7 +163,9 @@ async def analyze_email(request: Request):
     # 5. Send a quick success message back to the Chrome Extension
     return {
         "status": "Success",
-        "message": f"Successfully read header for email: {email_subject}"
+        "message": f"Successfully read header for email: {email_subject}",
+        "body_findings": body_findings,
+        "links": email_urls,
     }
 
 if __name__ == "__main__":

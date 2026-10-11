@@ -1,3 +1,8 @@
 *.pem
 *.crx
 *.der
+.venv/
+__pycache__/
+*.pyc
+.env
+test_emails/
