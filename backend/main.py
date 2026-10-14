@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware 
 import base64
 import re 
+import hashlib
 
 from body_classifier import BodyAnalyzer
 
@@ -45,6 +46,47 @@ def extract_urls(email_body):
 
     # Removes duplicate URLs
     return list(dict.fromkeys(urls))
+
+# Find images/attachments in the email and retrives hashes
+def extract_attachment_hashes(payload):
+    attachment_hashes = []
+
+    # Checks each part of the email
+    def check_parts(part):
+        filename = part.get("filename", "")
+        mime_type = part.get("mimeType", "")
+        body = part.get("body", {})
+
+        # Check if it's an image or a named attachment
+        is_attachment = bool(filename) or mime_type.startswith("image/")
+
+        # Gets the attachment data if it's available
+        if is_attachment and body.get("data"):
+            try:
+                # Converts the attachment data back into file bytes
+                data = body["data"]
+                padding = "=" * (-len(data) % 4)
+                file_bytes = base64.urlsafe_b64decode(data + padding)
+
+                # Calculates the file's hash
+                sha256_hash = hashlib.sha256(file_bytes).hexdigest()
+
+                # Saves the filename and hash
+                attachment_hashes.append({
+                    "filename": filename or "Unnamed image",
+                    "mime_type": mime_type,
+                    "sha256": sha256_hash
+                })
+
+            except Exception as error:
+                print(f"Could not hash {filename}: {error}")
+
+        # Check any parts inside this part
+        for child_part in part.get("parts", []):
+            check_parts(child_part)
+
+    check_parts(payload)
+    return attachment_hashes
 
 @app.post("/analyze")
 async def analyze_email(request: Request):
@@ -111,6 +153,9 @@ async def analyze_email(request: Request):
     email_urls = extract_urls(decoded_body)
 
     body_findings = body_analyzer.analyze(decoded_body) if body_decoded_ok else []
+
+    # Calculates hashes for images/attachments
+    attachment_hashes = extract_attachment_hashes(email_json.get("payload", {}))
     
     # 4. Print headers to terminal
     print("\n" + "="*50)
@@ -139,11 +184,22 @@ async def analyze_email(request: Request):
     if email_urls: 
         for url in email_urls:
             print(f"URL: {url}")
-
             print()
     else:
         print("No URLs found.")
+        print()
 
+   # Prints filename, type of attachment, and hash  
+    if attachment_hashes:
+        print("🐟 SHA256 ANALYSIS:")
+        
+        for attachment in attachment_hashes:
+            print("Filename:", attachment["filename"])
+            print("Type:", attachment["mime_type"])
+            print("SHA256:", attachment["sha256"])
+            print()
+    else:
+        print("🐟 SHA256 ANALYSIS: No attachments found.")
         print()
 
     print("🐟 BODY ANALYSIS:")
