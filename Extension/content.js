@@ -115,10 +115,20 @@ function getCurrentEmailId() {
 
     console.log("Analyzing email:", messageId);
 
-    chrome.runtime.sendMessage({
-      action: "ANALYZE_EMAIL",
-      messageId: messageId
-    });
+    chrome.runtime.sendMessage(
+      { action: "ANALYZE_EMAIL", messageId: messageId },
+      (response) => {
+        // The backend results come back here (background.js has to call sendResponse).
+        if (chrome.runtime.lastError) {
+          console.log("PhishCatcher: no response from background.js:", chrome.runtime.lastError.message);
+          return;
+        }
+        if (response && response.body_findings && typeof phishcatcherHighlight === "function") {
+          const count = phishcatcherHighlight(response.body_findings);
+          console.log("PhishCatcher highlighted", count, "phrase(s) in the email");
+        }
+      }
+    );
 
     // button text
     button.innerHTML = "Analyzing...";

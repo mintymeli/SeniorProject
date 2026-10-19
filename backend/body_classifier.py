@@ -27,16 +27,6 @@ URGENCY_PATTERNS = [
 ]
 
 
-def find_urgency(text: str) -> list[str]:
-    """Returns the urgency phrases found in already-lowercased text."""
-    hits = []
-    for pattern in URGENCY_PATTERNS:
-        match = re.search(pattern, text)
-        if match:
-            hits.append(match.group(0))
-    return hits
-
-
 GENERIC_GREETING = re.compile(
     r"\b(dear (customer|user|member|client|valued customer|account holder)|valued customer|hello (customer|user))\b",
     re.IGNORECASE,
@@ -49,6 +39,51 @@ SENSITIVE_PHRASES = [
 ]
 
 URL_PATTERN = re.compile(r"https?://[^\s<>\"')\]]+", re.IGNORECASE)
+
+
+def sentence_around(text: str, start: int, end: int, max_len: int = 220) -> str:
+    """The sentence that contains text[start:end], trimmed if it is very long."""
+    left = max(text.rfind(c, 0, start) for c in ".!?")
+    rights = [i for i in (text.find(c, end) for c in ".!?") if i != -1]
+    right = min(rights) + 1 if rights else len(text)
+    sentence = text[left + 1:right].strip()
+    if len(sentence) > max_len:  # run-on text: keep a window around the phrase
+        lo = max(0, start - 100 - (left + 1))
+        sentence = "..." + text[left + 1:right][lo:lo + max_len].strip() + "..."
+    return sentence
+
+
+def collect_evidence(clean: str) -> dict[str, list[dict]]:
+    """
+    Finds the exact words that trigger each rule, with the sentence they sit in.
+    Returns {finding type: [{"phrase": ..., "sentence": ...}, ...]} for the rules that fired.
+    """
+    found = {"Urgency Language": [], "Generic Greeting": [], "Sensitive Info Request": []}
+
+    def add(kind: str, match: re.Match):
+        phrase = match.group(0)
+        if any(e["phrase"].lower() == phrase.lower() for e in found[kind]):
+            return
+        found[kind].append({
+            "phrase": phrase,
+            "sentence": sentence_around(clean, match.start(), match.end()),
+        })
+
+    for pattern in URGENCY_PATTERNS:
+        m = re.search(pattern, clean, re.IGNORECASE)
+        if m:
+            add("Urgency Language", m)
+
+    m = GENERIC_GREETING.search(clean)
+    if m:
+        add("Generic Greeting", m)
+
+    for phrase in SENSITIVE_PHRASES:
+        m = re.search(re.escape(phrase), clean, re.IGNORECASE)
+        if m:
+            add("Sensitive Info Request", m)
+
+    return {kind: items for kind, items in found.items() if items}
 
 
 def extract_links(body: str) -> list[str]:
@@ -104,13 +139,8 @@ class BodyAnalyzer:
             }]
 
         score = self.phishing_probability(body)
-        lowered = clean_body(body).lower()
-        urgency_hits = find_urgency(lowered)
-        has_rule_hit = (
-            bool(urgency_hits)
-            or any(p in lowered for p in SENSITIVE_PHRASES)
-            or bool(GENERIC_GREETING.search(lowered))
-        )
+        evidence = collect_evidence(clean_body(body))
+        has_rule_hit = bool(evidence)
 
         # The model alone over-flags automated email (receipts, job alerts, codes),
         # so a high score only becomes Medium/High when a rule-based check agrees.
@@ -128,28 +158,31 @@ class BodyAnalyzer:
                     "severity": "Low",
                 })
 
-        hits = urgency_hits
-        if hits:
+        def phrases(kind):
+            return [e["phrase"] for e in evidence[kind]]
+
+        if "Urgency Language" in evidence:
             findings.append({
                 "type": "Urgency Language",
-                "description": "Pressures you to act quickly: " + ", ".join(hits),
+                "description": "Pressures you to act quickly: " + ", ".join(f'"{p}"' for p in phrases("Urgency Language")),
                 "severity": "Medium",
+                "evidence": evidence["Urgency Language"],
             })
 
-        greeting = GENERIC_GREETING.search(lowered)
-        if greeting:
+        if "Generic Greeting" in evidence:
             findings.append({
                 "type": "Generic Greeting",
-                "description": f'Uses a generic greeting ("{greeting.group(0)}") instead of your name.',
+                "description": f'Uses a generic greeting ("{phrases("Generic Greeting")[0]}") instead of your name.',
                 "severity": "Low",
+                "evidence": evidence["Generic Greeting"],
             })
 
-        asked = [p for p in SENSITIVE_PHRASES if p in lowered]
-        if asked:
+        if "Sensitive Info Request" in evidence:
             findings.append({
                 "type": "Sensitive Info Request",
-                "description": "Mentions sensitive information: " + ", ".join(asked),
+                "description": "Mentions sensitive information: " + ", ".join(f'"{p}"' for p in phrases("Sensitive Info Request")),
                 "severity": "High",
+                "evidence": evidence["Sensitive Info Request"],
             })
 
         return findings

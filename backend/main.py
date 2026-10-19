@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware 
+from email_checks import analyze_attachments, analyze_sender_and_recipients
 import base64
 import re 
 import hashlib
@@ -154,6 +155,10 @@ async def analyze_email(request: Request):
 
     body_findings = body_analyzer.analyze(decoded_body) if body_decoded_ok else []
 
+    # Attachment and sender/recipient checks stay separate from the body findings
+    attachment_findings = analyze_attachments(email_json.get("payload", {}), decoded_body if body_decoded_ok else "", body_analyzer)
+    sender_findings = analyze_sender_and_recipients(header_map)
+
     # Calculates hashes for images/attachments
     attachment_hashes = extract_attachment_hashes(email_json.get("payload", {}))
     
@@ -202,6 +207,22 @@ async def analyze_email(request: Request):
         print("🐟 SHA256 ANALYSIS: No attachments found.")
         print()
 
+    print("🐟 ATTACHMENT ANALYSIS:")
+    if attachment_findings:
+        for finding in attachment_findings:
+            print(f"[{finding['severity']}] {finding['type']}: {finding['description']}")
+    else:
+        print("No attachment warning signs found.")
+    print()
+
+    print("🐟 SENDER & RECIPIENT ANALYSIS:")
+    if sender_findings:
+        for finding in sender_findings:
+            print(f"[{finding['severity']}] {finding['type']}: {finding['description']}")
+    else:
+        print("No sender or recipient warning signs found.")
+    print()
+
     print("🐟 BODY ANALYSIS:")
     if body_findings:
         for finding in body_findings:
@@ -221,6 +242,8 @@ async def analyze_email(request: Request):
         "status": "Success",
         "message": f"Successfully read header for email: {email_subject}",
         "body_findings": body_findings,
+        "attachment_findings": attachment_findings,
+        "sender_findings": sender_findings,
         "links": email_urls,
     }
 

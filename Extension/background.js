@@ -109,9 +109,13 @@ async function analyzeEmail(messageId) {
     
     const analysisResult = await backendResponse.json();
     console.log("PhishCatcher Analysis Verdict:", analysisResult);
-    
+
+    // Hand the result back so content.js can highlight the flagged phrases
+    return analysisResult;
+
   } catch (error) {
     console.error("Error processing email in background script:", error);
+    return { error: String(error) };
   }
 }
 
@@ -124,6 +128,8 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "ANALYZE_EMAIL") {
     console.log("Received Gmail API message ID:", message.messageId);
-    analyzeEmail(message.messageId);
+    // Reply to content.js with the backend result once it is ready
+    analyzeEmail(message.messageId).then((result) => sendResponse(result));
+    return true; // keeps the message channel open for the async reply
   }
 });
