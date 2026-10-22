@@ -24,6 +24,18 @@
       "js": ["highlight.js", "content.js"]
     }
   ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "analysis_popup.html",
+        "analysis_popup.css",
+        "analysis_popup.js"
+      ],
+      "matches": [
+        "https://mail.google.com/*"
+      ]
+    }
+  ],
   "oauth2": {
     "client_id": "284386632337-no066nve6okfp42brciil5e4uqqa6d2r.apps.googleusercontent.com",
     "scopes": [

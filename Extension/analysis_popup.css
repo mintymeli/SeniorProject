@@ -1,0 +1,235 @@
+/* PhishCatcher — Analysis Panel */
+
+:root {
+  --blue: #4776e6;
+  --blue-light: #edf3ff;
+  --ink: #26334a;
+  --muted: #788398;
+  --surface: #ffffff;
+  --background: #f7f9fc;
+  --border: #e8ecf3;
+  --green: #25855a;
+  --green-light: #e8f7ef;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 100%;
+  min-width: 300px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: var(--ink);
+  background: var(--background);
+  font-size: 14px;
+}
+
+#phishcatcher-panel {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--background);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.fish-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: var(--blue-light);
+  font-size: 24px;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.4px;
+}
+
+.brand p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+#close-panel {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 26px;
+  cursor: pointer;
+}
+
+#close-panel:hover {
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+/* Risk summary */
+
+.risk-summary {
+  margin: 18px 16px;
+  padding: 20px;
+  border: 1px solid #dfe8ff;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ffffff, #f0f5ff);
+}
+
+.section-label {
+  margin: 0 0 12px;
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.risk-summary h2 {
+  margin: 0 0 8px;
+  font-size: 21px;
+  letter-spacing: -0.5px;
+}
+
+.risk-summary > p:not(.section-label) {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.risk-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 7px 10px;
+  border-radius: 20px;
+  background: var(--green-light);
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+/* Tabs */
+
+.tabs {
+  display: flex;
+  gap: 5px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  position: relative;
+  flex: 1;
+  padding: 13px 6px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--blue);
+}
+
+.tab.active {
+  border-bottom-color: var(--blue);
+  color: var(--blue);
+}
+
+/* Tab content */
+
+.tab-content {
+  flex: 1;
+  padding: 20px 16px;
+}
+
+.tab-panel h3 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  letter-spacing: -0.2px;
+}
+
+.placeholder {
+  padding: 25px 18px;
+  border: 1px dashed #d9e1ee;
+  border-radius: 14px;
+  background: var(--surface);
+  text-align: center;
+}
+
+.placeholder-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  border-radius: 16px;
+  background: var(--blue-light);
+  font-size: 23px;
+}
+
+.placeholder p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.placeholder p strong {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 13px;
+}
+
+.placeholder p + p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Footer */
+
+.panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 15px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 10px;
+}

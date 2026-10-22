@@ -32,6 +32,82 @@ checkCurrentEmail();
 // Testing data-legacy-message-id
 // PhishCatcher Content Script
 
+let phishCatcherPanel = null;
+let phishCatcherReopenTab = null;
+
+function createAnalysisPanel() {
+  // Reuse the existing panel if it was already created.
+  if (phishCatcherPanel) {
+    phishCatcherPanel.style.display = "block";
+    phishCatcherReopenTab.style.display = "none";
+    return;
+  }
+
+  // Create the panel container.
+  const panel = document.createElement("iframe");
+  panel.id = "phishcatcher-analysis-frame";
+  panel.src = chrome.runtime.getURL("analysis_popup.html");
+
+  Object.assign(panel.style, {
+    position: "fixed",
+    top: "0",
+    right: "0",
+    width: "380px",
+    height: "100vh",
+    border: "none",
+    background: "#f7f9fc",
+    boxShadow: "-4px 0 20px rgba(0,0,0,0.15)",
+    zIndex: "1000001"
+  });
+
+  document.body.appendChild(panel);
+  phishCatcherPanel = panel;
+
+  // Create a tab that lets user reopen the panel
+  const reopenTab = document.createElement("button");
+  reopenTab.id = "phishcatcher-reopen-tab";
+  reopenTab.textContent = "🐟 PhishCatcher";
+  reopenTab.title = "Reopen PhishCatcher analysis";
+
+  Object.assign(reopenTab.style, {
+    position: "fixed",
+    top: "50%",
+    right: "0",
+    transform: "translateY(-50%)",
+    padding: "12px 10px",
+    border: "1px solid #dce5f5",
+    borderRight: "none",
+    borderRadius: "12px 0 0 12px",
+    background: "white",
+    color: "#4776e6",
+    fontSize: "12px",
+    fontWeight: "600",
+    cursor: "pointer",
+    boxShadow: "-2px 2px 10px rgba(0,0,0,0.12)",
+    zIndex: "1000000",
+    display: "none"
+  });
+
+  reopenTab.addEventListener("click", () => {
+    panel.style.display = "block";
+    reopenTab.style.display = "none";
+  });
+
+  document.body.appendChild(reopenTab);
+  phishCatcherReopenTab = reopenTab;
+}
+
+// Listen for the popup's close button.
+window.addEventListener("message", (event) => {
+  if (
+    event.source === phishCatcherPanel?.contentWindow &&
+    event.data?.type === "PHISHCATCHER_CLOSE"
+  ) {
+    phishCatcherPanel.style.display = "none";
+    phishCatcherReopenTab.style.display = "block";
+  }
+});
+
 function getCurrentEmailId() {
   const emailElement = document.querySelector('div.adn');
 
@@ -91,11 +167,12 @@ function getCurrentEmailId() {
 
   button.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
 
-  // when the button is clicked
+  // when button is clicked
   button.addEventListener("click", () => {
 
     console.log("PhishCatcher Analyze button clicked.");
-
+    // update
+    createAnalysisPanel();
     const emailElement = document.querySelector('div.adn');
 
    if (!emailElement) {

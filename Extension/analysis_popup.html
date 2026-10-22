@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhishCatcher Analysis</title>
+  <link rel="stylesheet" href="analysis_popup.css">
+</head>
+<body>
+  <aside id="phishcatcher-panel">
+    <header class="panel-header">
+      <div class="brand">
+        <span class="fish-icon">🐟</span>
+        <div>
+          <h1>PhishCatcher</h1>
+          <p>Email Security Assistant</p>
+        </div>
+      </div>
+
+      <button id="close-panel" aria-label="Close panel">×</button>
+    </header>
+
+    <section class="risk-summary">
+      <p class="section-label">EMAIL SECURITY REPORT</p>
+      <h2 id="risk-title">Ready to analyze</h2>
+      <p id="risk-description">
+        Your email findings will appear here after analysis.
+      </p>
+      <div class="risk-status">
+        <span class="status-dot"></span>
+        <span id="risk-status-text">Waiting for results</span>
+      </div>
+    </section>
+
+    <nav class="tabs" aria-label="Analysis sections">
+      <button class="tab active" data-tab="findings">Findings</button>
+      <button class="tab" data-tab="headers">Headers</button>
+      <button class="tab" data-tab="actions">What to do</button>
+    </nav>
+
+    <main class="tab-content">
+      <section class="tab-panel active" id="findings">
+        <h3>Security findings</h3>
+        <div class="placeholder">
+          <span class="placeholder-icon">🔎</span>
+          <p><strong>Your findings will appear here</strong></p>
+          <p>We'll show suspicious links, sender concerns, and other indicators detected in the email.</p>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="headers" hidden>
+        <h3>Email headers</h3>
+        <div class="placeholder">
+          <span class="placeholder-icon">✉️</span>
+          <p><strong>Header details will appear here</strong></p>
+          <p>Sender information and available authentication results will be displayed here.</p>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="actions" hidden>
+        <h3>Recommended next steps</h3>
+        <div class="placeholder">
+          <span class="placeholder-icon">🛡️</span>
+          <p><strong>Your next steps will appear here</strong></p>
+          <p>We'll provide guidance based on the email analysis results.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="panel-footer">
+      <span>🐟</span>
+      <span>PhishCatcher · Email protection, made simpler</span>
+    </footer>
+  </aside>
+
+  <script src="analysis_popup.js"></script>
+</body>
+</html>
