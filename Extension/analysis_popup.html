@@ -50,11 +50,102 @@
 
       <section class="tab-panel" id="headers" hidden>
         <h3>Email headers</h3>
-        <div class="placeholder">
-          <span class="placeholder-icon">✉️</span>
-          <p><strong>Header details will appear here</strong></p>
-          <p>Sender information and available authentication results will be displayed here.</p>
-        </div>
+
+        <p class="headers-intro">
+            These details come from the email's original headers.
+            Some fields may not be available.
+        </p>
+
+        <div class="header-list">
+
+            <div class="header-item">
+            <div class="header-label">
+                <span>From</span>
+                <button class="info-button"
+                type="button"
+                title="The sender address listed in the email."
+                aria-label="About From">ⓘ</button>
+            </div>
+            <p class="header-value" id="header-from">Waiting for data...</p>
+            </div>
+
+            <div class="header-item">
+            <div class="header-label">
+                <span>Subject</span>
+                <button class="info-button"
+                type="button"
+                title="The subject line of the email."
+                aria-label="About Subject">ⓘ</button>
+            </div>
+            <p class="header-value" id="header-subject">Waiting for data...</p>
+            </div>
+
+            <div class="header-item">
+            <div class="header-label">
+                <span>Date</span>
+                <button class="info-button"
+                type="button"
+                title="The date and time stated in the email header."
+                aria-label="About Date">ⓘ</button>
+            </div>
+            <p class="header-value" id="header-date">Waiting for data...</p>
+            </div>
+
+            <div class="header-item">
+            <div class="header-label">
+                <span>Reply-To</span>
+                <button class="info-button"
+                type="button"
+                title="The address replies may be sent to. It can differ from the sender."
+                aria-label="About Reply-To">ⓘ</button>
+            </div>
+            <p class="header-value" id="header-reply-to">Waiting for data...</p>
+            </div>
+
+            <div class="header-item">
+            <div class="header-label">
+                <span>Return-Path</span>
+                <button class="info-button"
+                type="button"
+                title="The address used for email delivery failures."
+                aria-label="About Return-Path">ⓘ</button>
+            </div>
+            <p class="header-value" id="header-return-path">Waiting for data...</p>
+            </div>
+
+            <div class="header-item">
+            <div class="header-label">
+                <span>Authentication Results</span>
+                <button class="info-button"
+                type="button"
+                title="Reports whether checks such as SPF, DKIM, and DMARC passed or failed, when provided."
+                aria-label="About Authentication Results">ⓘ</button>
+            </div>
+            <div class="header-value" id="header-auth-results">Waiting for data...</div>
+            </div>
+
+            <div class="header-item">
+            <div class="header-label">
+                <span>Received</span>
+                <button class="info-button"
+                type="button"
+                title="Records of mail servers involved in delivering the email."
+                aria-label="About Received">ⓘ</button>
+            </div>
+            <div class="header-value" id="header-received">Waiting for data...</div>
+            </div>
+
+            <div class="header-item">
+            <div class="header-label">
+                <span>Message-ID</span>
+                <button class="info-button"
+                type="button"
+                title="An identifier assigned to this particular email message."
+                aria-label="About Message-ID">ⓘ</button>
+            </div>
+            <p class="header-value" id="header-message-id">Waiting for data...</p>
+            </div>
+        </div> 
       </section>
 
       <section class="tab-panel" id="actions" hidden>

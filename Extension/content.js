@@ -200,6 +200,20 @@ function getCurrentEmailId() {
           console.log("PhishCatcher: no response from background.js:", chrome.runtime.lastError.message);
           return;
         }
+
+        // Check whether headers reached content.js
+        console.log("Headers received in content.js:", response?.headers);
+
+        // update: send header object to main
+        if (response && response.headers && phishCatcherPanel?.contentWindow) {
+          phishCatcherPanel.contentWindow.postMessage(
+            {
+              type: "PHISHCATCHER_ANALYSIS_RESULT",
+              headers: response.headers
+            },
+            "*"
+          );
+        }
         if (response && response.body_findings && typeof phishcatcherHighlight === "function") {
           const count = phishcatcherHighlight(response.body_findings);
           console.log("PhishCatcher highlighted", count, "phrase(s) in the email");

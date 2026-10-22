@@ -233,3 +233,73 @@ body {
   color: var(--muted);
   font-size: 10px;
 }
+
+/* Headers tab */
+
+.headers-intro {
+  margin: -6px 0 16px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.header-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.header-item {
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.header-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.info-button {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid #dce5f5;
+  border-radius: 50%;
+  background: var(--blue-light);
+  color: var(--blue);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: help;
+}
+
+.info-button:hover,
+.info-button:focus-visible {
+  background: var(--blue);
+  color: white;
+  outline: none;
+}
+
+.header-value {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.header-value:empty::before {
+  content: "Not provided";
+  color: var(--muted);
+  font-style: italic;
+}

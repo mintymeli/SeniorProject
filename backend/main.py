@@ -241,6 +241,19 @@ async def analyze_email(request: Request):
     return {
         "status": "Success",
         "message": f"Successfully read header for email: {email_subject}",
+
+        # Header object with exttracted values
+        "headers": {
+            "subject": email_subject,
+            "from": email_sender,
+            "date": email_date,
+            "reply_to": email_reply_to,
+            "return_path": email_return_path,
+            "received": email_received,
+            "authentication_results": email_auth_results,
+            "message_id": email_message_id,
+        },
+
         "body_findings": body_findings,
         "attachment_findings": attachment_findings,
         "sender_findings": sender_findings,
