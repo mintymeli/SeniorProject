@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware 
 from email_checks import analyze_attachments, analyze_sender_and_recipients
+from threat_intel import analyze_tools, vt_result
 import base64
 import re 
 import hashlib
@@ -161,6 +162,12 @@ async def analyze_email(request: Request):
 
     # Calculates hashes for images/attachments
     attachment_hashes = extract_attachment_hashes(email_json.get("payload", {}))
+
+    # Analyze email links and attachment hashes using threat intel tools
+    threat_intel_results = analyze_tools(
+        email_urls, 
+        attachment_hashes
+    )
     
     # 4. Print headers to terminal
     print("\n" + "="*50)
@@ -237,6 +244,28 @@ async def analyze_email(request: Request):
     print(decoded_body)
     print("="*50 + "\n")
 
+    # ----- Prints Threat Intel Results -----
+    
+    # Prints VT URL Results
+    print("🐟 VIRUSTOTAL URL ANALYSIS:")
+
+    if threat_intel_results["url_results"]:
+        for result in threat_intel_results["url_results"]:
+            print(vt_result(result, "URL"))
+            print()
+    else:
+        print("No URLs found.")
+
+    # Prints VT Hash Results
+    print("\n🐟 VIRUSTOTAL HASH ANALYSIS:")
+
+    if threat_intel_results["file_hash_results"]:
+        for result in threat_intel_results["file_hash_results"]:
+            print(vt_result(result, "SHA256"))
+            print()
+    else:
+        print("No attachment hashes found.")
+
     # 5. Send a quick success message back to the Chrome Extension
     return {
         "status": "Success",
@@ -258,6 +287,7 @@ async def analyze_email(request: Request):
         "attachment_findings": attachment_findings,
         "sender_findings": sender_findings,
         "links": email_urls,
+        "threat_intel_results": threat_intel_results,
     }
 
 if __name__ == "__main__":
