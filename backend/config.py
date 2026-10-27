@@ -11,3 +11,6 @@ load_dotenv(BASE_DIR / ".env")
 
 # Retrieves the VT API key
 VIRUSTOTAL_API_KEY = os.getenv("VIRUSTOTAL_API_KEY")
+
+# Retrieves IPQS API Key
+IPQS_API_KEY = os.getenv("IPQS_API_KEY")

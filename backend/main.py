@@ -266,6 +266,30 @@ async def analyze_email(request: Request):
     else:
         print("No attachment hashes found.")
 
+    # IPQS URL Results
+    print("\n🐟 IPQUALITYSCORE ANALYSIS:")
+
+    if threat_intel_results["ipqs_results"]:
+        for result in threat_intel_results["ipqs_results"]:
+            safe = result.get("safe")
+            safe_output = (
+                "Yes" if safe is True
+                else "No" if safe is False
+                else "N/A"
+            )
+
+            print(f"URL: {result.get('url', 'N/A')}")
+            print(f"Safe: {safe_output}")
+            print(f"Suspicious: {result.get('suspicious', 'N/A')}")
+            print(f"Domain: {result.get('domain', 'N/A')}")
+            print(f"Malware: {result.get('malware', 'N/A')}")
+            print(f"Phishing: {result.get('phishing', 'N/A')}")
+            print(f"Risk Score: {result.get('risk_score', 'N/A')}")
+            print(f"Domain Age: {result.get('domain_age') or 'N/A'}")
+            print()
+    else:
+        print("No URLs found for IPQS analysis.")    
+
     # 5. Send a quick success message back to the Chrome Extension
     return {
         "status": "Success",

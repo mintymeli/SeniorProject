@@ -1,8 +1,13 @@
 
 import base64
 import httpx
+from urllib.parse import quote
 
 from config import VIRUSTOTAL_API_KEY
+from config import IPQS_API_KEY
+
+
+# ----- VirusTotal Analysis -----
 
 # VT API settings
 VT_BASE_URL = "https://www.virustotal.com/api/v3"
@@ -49,7 +54,7 @@ def _handle_error(response, indicator):
         "error": f"VirusTotal returned HTTP {response.status_code}."
     }
 
-# ----- VirusTotal -----
+# ----- VirusTotal URL Analysis -----
 
 # Looks up a VT report for links
 def analyze_url_virustotal(url):
@@ -160,6 +165,90 @@ def analyze_hash_virustotal(file_hash):
             "error": "Could not read the VirusTotal response."
         }
 
+# ----- IPQualityScore URL Analysis -----
+
+# Checks a URL using IPQS
+def analyze_url_ipqs(url):
+
+    # Check if the IPQS key is not configured
+    if not IPQS_API_KEY:
+        return {
+            "url": url,
+            "status": "Error",
+            "error": "IPQS API key is not configured."
+        }
+
+    # Encode the URL so it can be sent to the IPQS API
+    encoded_url = quote(url, safe="")
+
+    # IPQS API address for checking URLs
+    endpoint = (
+        f"https://www.ipqualityscore.com/api/json/url/"
+        f"{IPQS_API_KEY}/{encoded_url}"
+    )
+
+    # Sends the API request
+    try:
+        response = httpx.get(endpoint, timeout=20)
+
+        # Handle HTTP errors
+        if response.status_code != 200:
+            return {
+                "url": url,
+                "status": "Error",
+                "error": f"IPQS returned HTTP {response.status_code}."
+            }
+
+        data = response.json()
+
+        # Check if IPQS reported an error with the analysis
+        if data.get("success") is False:
+            return {
+                "url": url,
+                "status": "Error",
+                "error": data.get(
+                    "message",
+                    "IPQS could not analyze this URL."
+                )
+            }
+
+        # Returns URL's safety status and domain age from the results
+        unsafe = data.get("unsafe")
+        domain_age = data.get("domain_age")
+
+        # Convert domain age to readable text
+        if isinstance(domain_age, dict):
+            domain_age = domain_age.get("human", "N/A")
+
+        # Returns the URL and security information to be displayed
+        return {
+            "url": url,
+            "status": "Report found",
+            "safe": not unsafe if isinstance(unsafe, bool) else None,
+            "suspicious": data.get("suspicious"),
+            "domain": data.get("domain"),
+            "malware": data.get("malware"),
+            "phishing": data.get("phishing"),
+            "risk_score": data.get("risk_score"),
+            "domain_age": domain_age
+        }
+
+    # Handles connection problems
+    except httpx.RequestError:
+        return {
+            "url": url,
+            "status": "Error",
+            "error": "Could not connect to IPQS."
+        }
+
+    # Handles problems processing API response
+    except (ValueError, TypeError):
+        return {
+            "url": url,
+            "status": "Error",
+            "error": "Could not read the IPQS response."
+        }
+
 # ----- Email Threat Intel Analysis -----
 
 # Analyses extracted email links and attachment hashes using VT
@@ -169,7 +258,7 @@ def analyze_tools(urls, attachment_hashes):
     results = {
         "url_results": [],
         "file_hash_results": [],
-        "urlscan_results": []
+        "ipqs_results": []
     }
 
     # Check each URL with VT
@@ -177,6 +266,12 @@ def analyze_tools(urls, attachment_hashes):
         results["url_results"].append(
             analyze_url_virustotal(url)
         )
+
+    # Checks URL with IPQS
+    for url in dict.fromkeys(urls):
+        results["ipqs_results"].append(
+            analyze_url_ipqs(url)
+    )
 
     # Collects hashes from email attachments
     unique_hashes = dict.fromkeys(
