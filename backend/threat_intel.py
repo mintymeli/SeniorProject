@@ -2,6 +2,7 @@
 import base64
 import httpx
 from urllib.parse import quote
+from concurrent.futures import ThreadPoolExecutor
 
 from config import VIRUSTOTAL_API_KEY
 from config import IPQS_API_KEY
@@ -251,41 +252,81 @@ def analyze_url_ipqs(url):
 
 # ----- Email Threat Intel Analysis -----
 
-# Analyses extracted email links and attachment hashes using VT
 def analyze_tools(urls, attachment_hashes):
 
-    # Stores the results for URLs and Hashes
+    # Store results separately
     results = {
         "url_results": [],
         "file_hash_results": [],
         "ipqs_results": []
     }
 
-    # Check each URL with VT
-    for url in dict.fromkeys(urls):
-        results["url_results"].append(
-            analyze_url_virustotal(url)
-        )
+    # Store all checks that will run
+    tasks = []
 
-    # Checks URL with IPQS
-    for url in dict.fromkeys(urls):
-        results["ipqs_results"].append(
-            analyze_url_ipqs(url)
-    )
+    # All multiple checks to run at the same time
+    with ThreadPoolExecutor(max_workers=10) as executor:
 
-    # Collects hashes from email attachments
-    unique_hashes = dict.fromkeys(
-        attachment["sha256"]
-        for attachment in attachment_hashes
-    )
+        # Check each URL once with VirusTotal and IPQS
+        for url in dict.fromkeys(urls):
 
-    # Checks each attachment hash with VT
-    for file_hash in unique_hashes:
-        results["file_hash_results"].append(
-            analyze_hash_virustotal(file_hash)
-        )
+            # Starts checking URLs with VT
+            tasks.append((
+                "url_results",
+                url,
+                "url",
+                executor.submit(analyze_url_virustotal, url)
+            ))
 
-    # Returns collected results
+            # Starts checking same URLs with IPQS
+            tasks.append((
+                "ipqs_results",
+                url,
+                "url",
+                executor.submit(analyze_url_ipqs, url)
+            ))
+
+        # Keeps track of attachment hashes we have already checked
+        seen_hashes = set()
+
+        # Goes thorugh each email attachment
+        for attachment in attachment_hashes:
+
+            # Gets the attachment's hash
+            file_hash = attachment.get("sha256")
+
+            # Skips attachements without a hash or with a duplicate hash
+            if not file_hash or file_hash in seen_hashes:
+                continue
+
+            # Remebers the hash so it's not checked twice
+            seen_hashes.add(file_hash)
+
+            # Starts checking hash with VT
+            tasks.append((
+                "file_hash_results",
+                file_hash,
+                "file_hash",
+                executor.submit(analyze_hash_virustotal, file_hash)
+            ))
+
+        # Collects each results
+        for result_type, item, item_key, future in tasks:
+
+            try:
+                # Gets the result once this check finishes
+                result = future.result()
+
+            except Exception as e:
+                # Saves the error if a check fails
+                result = {
+                    item_key: item,
+                    "error": str(e)
+                }
+
+            # Adds the result to the correct list
+            results[result_type].append(result)
+
     return results
 
 # ----- Formatted VT Results -----
