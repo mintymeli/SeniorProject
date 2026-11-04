@@ -302,7 +302,7 @@ async def analyze_email(request: Request):
             if result.get("status") == "Submission failed":
                 print(
                     f"Submission failed: HTTP "
-                    f"{result.get('http_code', 'Unknown')}. Report Unavailable"
+                    f"{result.get('http_code', 'Unknown')}"
             )
 
             if result.get("status") == "Report found":
