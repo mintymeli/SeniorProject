@@ -14,3 +14,6 @@ VIRUSTOTAL_API_KEY = os.getenv("VIRUSTOTAL_API_KEY")
 
 # Retrieves IPQS API Key
 IPQS_API_KEY = os.getenv("IPQS_API_KEY")
+
+# Retrived URLScan.io API Key
+URLSCAN_API_KEY = os.getenv("URLSCAN_API_KEY")
