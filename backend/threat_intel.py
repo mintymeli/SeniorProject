@@ -1,11 +1,14 @@
 
 import base64
 import httpx
+import time
 from urllib.parse import quote
+from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 
 from config import VIRUSTOTAL_API_KEY
 from config import IPQS_API_KEY
+from config import URLSCAN_API_KEY
 
 
 # ----- VirusTotal Analysis -----
@@ -250,6 +253,245 @@ def analyze_url_ipqs(url):
             "error": "Could not read the IPQS response."
         }
 
+# ----- URLscan.io Analysis Function -----
+
+# - Domain registration information -
+# Gets the domain's registration date and registrar using RDAP (registration data access protocol)
+def get_domain_info(domain):
+
+    # Removes www. so RDAP can look up the registered domain
+    domain = domain.lower().strip()
+
+    if domain.startswith("www."):
+        domain = domain[4:]
+
+    try:
+        # Uses the correct RDAP server for the domain
+        if domain.endswith(".com"):
+            endpoint = (
+                f"https://rdap.verisign.com/com/v1/domain/{domain}"
+            )
+        else:
+            endpoint = f"https://rdap.org/domain/{domain}"
+
+        response = httpx.get(
+            endpoint,
+            timeout=20,
+            follow_redirects=True
+        )
+
+        data = response.json()
+
+        domain_created = "Not found."
+        domain_registrar = "Not found."
+
+        # Finds the original registration date
+        for event in data.get("events", []):
+
+            if event.get("eventAction", "").lower() == "registration":
+
+                created_date = event.get("eventDate")
+
+                if created_date:
+                    date = datetime.fromisoformat(
+                        created_date.replace("Z", "+00:00")
+                    )
+
+                    day = date.day
+
+                    # Adds the correct ending to the day
+                    if 11 <= day <= 13:
+                        suffix = "th"
+                    else:
+                        suffix = {
+                            1: "st",
+                            2: "nd",
+                            3: "rd"
+                        }.get(day % 10, "th")
+
+                    # Displays only the month, day, and year
+                    domain_created = (
+                        f"{date.strftime('%B')} "
+                        f"{day}{suffix}, "
+                        f"{date.strftime('%Y')}"
+                    )
+
+                    break
+
+        # Finds the domain registrar's name
+        for entity in data.get("entities", []):
+
+            if "registrar" in entity.get("roles", []):
+
+                vcard = entity.get("vcardArray", [])
+
+                if len(vcard) > 1:
+
+                    for field in vcard[1]:
+
+                        if field[0] == "fn":
+                            domain_registrar = field[3]
+                            break
+
+                break
+
+        return {
+            "domain_created": domain_created,
+            "domain_registrar": domain_registrar
+        }
+
+    except (httpx.RequestError, ValueError, TypeError, KeyError) as e:
+
+        print(f"[RDAP] Error: {e}")
+
+        return {
+            "domain_created": "Not found.",
+            "domain_registrar": "Not found."
+        }
+
+# ----- URLscan.io URL Analysis -----
+
+# Submits a URL to URLscan and retrives it's completed report
+def analyze_urlscan(url):
+
+    # Checks if the URLscan API key is configured
+    if not URLSCAN_API_KEY:
+        return {
+            "url": url,
+            "status": "Error",
+            "error": "URLscan API key is not configured."
+        }
+
+    # URLscan API endpoint
+    endpoint = "https://urlscan.io/api/v1/scan/"
+
+    # Headers needed to authenticate with URLscan
+    headers = {
+        "API-Key": URLSCAN_API_KEY,
+        "Content-Type": "application/json"
+    }
+
+    # Information sent to URLscan for scanning
+    payload = {
+        "url": url,
+        "visibility": "unlisted"
+    }
+
+    try:
+        # Submits the URL for scanning
+        response = httpx.post(
+            endpoint,
+            headers=headers,
+            json=payload,
+            timeout=20
+        )
+
+        # Checks whether URLscan accepted the submission
+        if response.status_code not in (200, 201):
+            return {
+                "url": url,
+                "status": "Submission failed",
+                "http_code": response.status_code
+            }
+
+        # Reads the scan ID and report URL
+        data = response.json()
+
+        scan_id = data.get("uuid")
+        result_url = data.get("result")
+
+        # Checks if URLscan returned a scan ID
+        if not scan_id:
+            return {
+                "url": url,
+                "status": "Error",
+                "message": "URLscan did not return a scan ID."
+            }
+
+        # URLscan result API endpoint
+        result_endpoint = (
+            f"https://urlscan.io/api/v1/result/{scan_id}/"
+        )
+
+        # Wait for URLscan to finish processing
+        time.sleep(30)
+
+        # Checks for the completed scan
+        for attempt in range(8):
+
+            result_response = httpx.get(
+                result_endpoint,
+                headers=headers,
+                timeout=20
+            )
+
+            # Report is still processing
+            if result_response.status_code == 404:
+                time.sleep(10)
+                continue
+
+            # Handles other HTTP errors
+            if result_response.status_code != 200:
+                return {
+                    "url": url,
+                    "status": "Error",
+                    "message": (
+                        f"Submission failed: "
+                        f"HTTP {result_response.status_code}"
+                    )
+                }
+
+            # Reads the completed scan information
+            scan_data = result_response.json()
+
+            page = scan_data.get("page", {})
+
+            # Gets the registered domain instead of the subdomain
+            domain = (
+                page.get("apexDomain")
+                or page.get("domain", "")
+            )
+
+            domain_info = get_domain_info(domain)
+
+            # Extracts the scan information
+            return {
+                "url": url,
+                "status": "Report found",
+                "page_title": page.get("title", "Not found."),
+                "final_url": page.get("url", "Not found."),
+                "domain_created": domain_info["domain_created"],
+                "domain_registrar": domain_info["domain_registrar"],
+                "ip": page.get("ip", "Not found."),
+                "country": page.get("country", "Not found."),
+                "result_url": result_url
+            }
+
+        # Scan did not finish within the period
+        return {
+            "url": url,
+            "status": "Pending",
+            "message": "Analysis report pending. No results available yet.",
+            "result_url": result_url,
+            "scan_id": scan_id
+        }
+
+    # Handles connection problems
+    except httpx.RequestError:
+        return {
+            "url": url,
+            "status": "Error",
+            "message": "Could not connect to URLscan."
+        }
+
+    # Handles unexpected response data
+    except (ValueError, KeyError, TypeError):
+        return {
+            "url": url,
+            "status": "Error",
+            "message": "Could not read the URLscan response."
+        }
+    
 # ----- Email Threat Intel Analysis -----
 
 def analyze_tools(urls, attachment_hashes):
@@ -258,7 +500,8 @@ def analyze_tools(urls, attachment_hashes):
     results = {
         "url_results": [],
         "file_hash_results": [],
-        "ipqs_results": []
+        "ipqs_results": [],
+        "urlscan_results": []
     }
 
     # Store all checks that will run
@@ -284,6 +527,14 @@ def analyze_tools(urls, attachment_hashes):
                 url,
                 "url",
                 executor.submit(analyze_url_ipqs, url)
+            ))
+
+            # Starts checking the same URL with URLscan.io
+            tasks.append((
+                "urlscan_results",
+                url,
+                "url",
+                executor.submit(analyze_urlscan, url)
             ))
 
         # Keeps track of attachment hashes we have already checked

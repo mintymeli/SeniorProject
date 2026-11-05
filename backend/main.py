@@ -266,7 +266,7 @@ async def analyze_email(request: Request):
     else:
         print("No attachment hashes found.")
 
-    # IPQS URL Results
+    # IPQS analysis results
     print("\n🐟 IPQUALITYSCORE ANALYSIS:")
 
     if threat_intel_results["ipqs_results"]:
@@ -288,7 +288,39 @@ async def analyze_email(request: Request):
             print(f"Domain Age: {result.get('domain_age') or 'N/A'}")
             print()
     else:
-        print("No URLs found for IPQS analysis.")    
+        print("No URLs found for IPQS analysis.") 
+
+    # URLscan.io analysis results
+    print("\n🐟 URLSCAN.IO URL ANALYSIS:")
+
+    if threat_intel_results["urlscan_results"]:
+
+        for result in threat_intel_results["urlscan_results"]:
+
+            print(f"URL: {result.get('url', 'No links found.')}")
+
+            if result.get("status") == "Submission failed":
+                print(
+                    f"Submission failed: HTTP "
+                    f"{result.get('http_code', 'Unknown')}"
+            )
+
+            if result.get("status") == "Report found":
+
+                print(f"Page Title: {result.get('page_title', 'Not found.')}")
+                print(f"Final Destination: {result.get('final_url', 'Not found.')}")
+                print(f"Domain created: {result.get('domain_created', 'Not found.')}")
+                print(f"Domain registrar: {result.get('domain_registrar', 'Not found.')}")
+                print(f"IP Address: {result.get('ip', 'Not found.')}")
+                print(f"Country: {result.get('country', 'Not found.')}")
+
+            else:
+                print(result.get("message", result.get("error", "Report unavailable.")))
+
+            print()
+
+    else:
+        print("No URLs found for analysis.")
 
     # 5. Send a quick success message back to the Chrome Extension
     return {
