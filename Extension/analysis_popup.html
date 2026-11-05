@@ -8,6 +8,7 @@
 </head>
 <body>
   <aside id="phishcatcher-panel">
+
     <header class="panel-header">
       <div class="brand">
         <span class="fish-icon">🐟</span>
@@ -16,7 +17,6 @@
           <p>Email Security Assistant</p>
         </div>
       </div>
-
       <button id="close-panel" aria-label="Close panel">×</button>
     </header>
 
@@ -39,6 +39,8 @@
     </nav>
 
     <main class="tab-content">
+
+      <!-- Findings tab -->
       <section class="tab-panel active" id="findings">
         <h3>Security findings</h3>
         <div class="placeholder">
@@ -48,106 +50,187 @@
         </div>
       </section>
 
+      <!-- Headers tab -->
       <section class="tab-panel" id="headers" hidden>
         <h3>Email headers</h3>
-
         <p class="headers-intro">
-            These details come from the email's original headers.
-            Some fields may not be available.
+          Learn what information is included in an email's original headers
+          and why these details are useful.
         </p>
 
-        <div class="header-list">
+        <!-- Email Information -->
+        <div class="header-section">
+          <h4>Email Information</h4>
+
+          <div class="header-list">
 
             <div class="header-item">
-            <div class="header-label">
-                <span>From</span>
-                <button class="info-button"
-                type="button"
-                title="The sender address listed in the email."
-                aria-label="About From">ⓘ</button>
-            </div>
-            <p class="header-value" id="header-from">Waiting for data...</p>
-            </div>
+              <div class="header-label">From</div>
+              <p class="header-value" id="display-from">Waiting for data...</p>
 
-            <div class="header-item">
-            <div class="header-label">
-                <span>Subject</span>
-                <button class="info-button"
-                type="button"
-                title="The subject line of the email."
-                aria-label="About Subject">ⓘ</button>
-            </div>
-            <p class="header-value" id="header-subject">Waiting for data...</p>
+              <div class="header-explanation">
+                <p><strong>What it means:</strong> Identifies the sender's name and email address shown in the message.</p>
+                <p><strong>Why it matters:</strong> Helps you identify who appears to have sent the email.</p>
+              </div>
             </div>
 
             <div class="header-item">
-            <div class="header-label">
-                <span>Date</span>
-                <button class="info-button"
-                type="button"
-                title="The date and time stated in the email header."
-                aria-label="About Date">ⓘ</button>
-            </div>
-            <p class="header-value" id="header-date">Waiting for data...</p>
+              <div class="header-label">Subject</div>
+              <p class="header-value" id="display-subject">Waiting for data...</p>
+
+              <div class="header-explanation">
+                <p><strong>What it means:</strong> The subject line describes what the email is about.</p>
+                <p><strong>Why it matters:</strong> Provides context about the message and what the sender wants you to notice.</p>
+              </div>
             </div>
 
             <div class="header-item">
-            <div class="header-label">
-                <span>Reply-To</span>
-                <button class="info-button"
-                type="button"
-                title="The address replies may be sent to. It can differ from the sender."
-                aria-label="About Reply-To">ⓘ</button>
-            </div>
-            <p class="header-value" id="header-reply-to">Waiting for data...</p>
+              <div class="header-label">Date</div>
+              <p class="header-value" id="display-date">Waiting for data...</p>
+
+              <div class="header-explanation">
+                <p><strong>What it means:</strong> Shows the date and time associated with the email.</p>
+                <p><strong>Why it matters:</strong> Helps establish when the message was sent and understand its timeline.</p>
+              </div>
             </div>
 
             <div class="header-item">
-            <div class="header-label">
-                <span>Return-Path</span>
-                <button class="info-button"
-                type="button"
-                title="The address used for email delivery failures."
-                aria-label="About Return-Path">ⓘ</button>
+              <div class="header-label">Reply-To</div>
+              <p class="header-value" id="display-reply-to">Waiting for data...</p>
+
+              <div class="header-explanation">
+                <p><strong>What it means:</strong> Identifies the address where replies to the email are directed.</p>
+                <p><strong>Why it matters:</strong> Helps you understand whether a response would go to the original sender or a different address.</p>
+              </div>
             </div>
-            <p class="header-value" id="header-return-path">Waiting for data...</p>
+
+          </div>
+        </div>
+
+        <!-- Authentication -->
+        <div class="header-section">
+          <h4>Authentication</h4>
+
+          <div class="header-list">
+
+            <div class="header-item">
+              <div class="header-label">SPF</div>
+              <p class="header-value" id="auth-spf">Waiting for data...</p>
+
+              <div class="header-explanation">
+                <p><strong>What it means:</strong> Checks whether the server sending the email is authorized to send messages for the evaluated domain.</p>
+                <p><strong>Why it matters:</strong> Helps identify emails sent from servers that may not be authorized by the domain owner.</p>
+              </div>
             </div>
 
             <div class="header-item">
-            <div class="header-label">
-                <span>Authentication Results</span>
-                <button class="info-button"
-                type="button"
-                title="Reports whether checks such as SPF, DKIM, and DMARC passed or failed, when provided."
-                aria-label="About Authentication Results">ⓘ</button>
-            </div>
-            <div class="header-value" id="header-auth-results">Waiting for data...</div>
+              <div class="header-label">DKIM</div>
+              <p class="header-value" id="auth-dkim">Waiting for data...</p>
+
+              <div class="header-explanation">
+                <p><strong>What it means:</strong> Uses a digital signature to verify that signed portions of the email have not been altered.</p>
+                <p><strong>Why it matters:</strong> Helps verify the integrity of the signed email content and its association with a signing domain.</p>
+              </div>
             </div>
 
             <div class="header-item">
-            <div class="header-label">
-                <span>Received</span>
-                <button class="info-button"
-                type="button"
-                title="Records of mail servers involved in delivering the email."
-                aria-label="About Received">ⓘ</button>
+              <div class="header-label">DMARC</div>
+              <p class="header-value" id="auth-dmarc">Waiting for data...</p>
+
+              <div class="header-explanation">
+                <p><strong>What it means:</strong> Checks whether SPF or DKIM authentication aligns with the domain shown in the sender's address.</p>
+                <p><strong>Why it matters:</strong> Helps domain owners protect their domains against unauthorized use and email spoofing.</p>
+              </div>
             </div>
-            <div class="header-value" id="header-received">Waiting for data...</div>
+
+          </div>
+        </div>
+
+        <!-- Technical Details -->
+        <div class="header-section">
+          <h4>Technical Details</h4>
+
+          <div class="header-list">
+
+            <div class="header-item">
+              <div class="header-label">Return-Path</div>
+              <p class="header-value" id="display-return-path">Waiting for data...</p>
+
+              <div class="header-explanation">
+                <p><strong>What it means:</strong> Identifies the address used to handle email delivery failure notifications.</p>
+                <p><strong>Why it matters:</strong> Provides information about the email's delivery process and can help with SPF authentication.</p>
+              </div>
             </div>
 
             <div class="header-item">
-            <div class="header-label">
-                <span>Message-ID</span>
-                <button class="info-button"
-                type="button"
-                title="An identifier assigned to this particular email message."
-                aria-label="About Message-ID">ⓘ</button>
+              <div class="header-label">Received</div>
+              <div class="header-value" id="display-received">Waiting for data...</div>
+
+              <div class="header-explanation">
+                <p><strong>What it means:</strong> Records the mail servers involved as the email travels from its sender to its destination.</p>
+                <p><strong>Why it matters:</strong> Helps trace the email's delivery route and identify server information, timestamps, and IP addresses for further analysis.</p>
+              </div>
             </div>
-            <p class="header-value" id="header-message-id">Waiting for data...</p>
+
+          </div>
+        </div>
+
+        <!-- Original Header Values -->
+        <details class="full-header-details">
+          <summary>View Full Details</summary>
+
+          <p class="headers-intro">
+            These are the original header values received from the email.
+            They include additional technical information for further inspection.
+          </p>
+
+          <div class="header-list">
+
+            <div class="header-item">
+              <div class="header-label">From</div>
+              <p class="header-value" id="header-from">Waiting for data...</p>
             </div>
-        </div> 
+
+            <div class="header-item">
+              <div class="header-label">Subject</div>
+              <p class="header-value" id="header-subject">Waiting for data...</p>
+            </div>
+
+            <div class="header-item">
+              <div class="header-label">Date</div>
+              <p class="header-value" id="header-date">Waiting for data...</p>
+            </div>
+
+            <div class="header-item">
+              <div class="header-label">Reply-To</div>
+              <p class="header-value" id="header-reply-to">Waiting for data...</p>
+            </div>
+
+            <div class="header-item">
+              <div class="header-label">Return-Path</div>
+              <p class="header-value" id="header-return-path">Waiting for data...</p>
+            </div>
+
+            <div class="header-item">
+              <div class="header-label">Authentication-Results</div>
+              <div class="header-value" id="header-auth-results">Waiting for data...</div>
+            </div>
+
+            <div class="header-item">
+              <div class="header-label">Received</div>
+              <div class="header-value" id="header-received">Waiting for data...</div>
+            </div>
+
+            <div class="header-item">
+              <div class="header-label">Message-ID</div>
+              <p class="header-value" id="header-message-id">Waiting for data...</p>
+            </div>
+
+          </div>
+        </details>
       </section>
 
+      <!-- What to do tab -->
       <section class="tab-panel" id="actions" hidden>
         <h3>Recommended next steps</h3>
         <div class="placeholder">
@@ -156,12 +239,14 @@
           <p>We'll provide guidance based on the email analysis results.</p>
         </div>
       </section>
+
     </main>
 
     <footer class="panel-footer">
       <span>🐟</span>
       <span>PhishCatcher · Email protection, made simpler</span>
     </footer>
+
   </aside>
 
   <script src="analysis_popup.js"></script>

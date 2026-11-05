@@ -45,6 +45,38 @@ window.addEventListener("message", (event) => {
     return;
   }
 
+  // Email Information
+  document.getElementById("display-from").textContent =
+    headers.from || "Not provided";
+
+  document.getElementById("display-subject").textContent =
+    headers.subject || "Not provided";
+
+  document.getElementById("display-date").textContent =
+    headers.date || "Not provided";
+
+  document.getElementById("display-reply-to").textContent =
+    headers.reply_to || "Not provided";
+
+
+  // Authentication
+  const authResults =
+    headers.authentication_results?.join("\n\n") || "Not provided";
+
+  document.getElementById("auth-spf").textContent = authResults;
+  document.getElementById("auth-dkim").textContent = authResults;
+  document.getElementById("auth-dmarc").textContent = authResults;
+
+
+  // Technical Details
+  document.getElementById("display-return-path").textContent =
+    headers.return_path || "Not provided";
+
+  document.getElementById("display-received").textContent =
+    headers.received?.join("\n\n") || "Not provided";
+
+
+  // Original Header Values
   document.getElementById("header-from").textContent =
     headers.from || "Not provided";
 
@@ -61,7 +93,7 @@ window.addEventListener("message", (event) => {
     headers.return_path || "Not provided";
 
   document.getElementById("header-auth-results").textContent =
-    headers.authentication_results?.join("\n\n") || "Not provided";
+    authResults;
 
   document.getElementById("header-received").textContent =
     headers.received?.join("\n\n") || "Not provided";

@@ -303,3 +303,75 @@ body {
   color: var(--muted);
   font-style: italic;
 }
+
+/* Headers tab sections */
+
+.header-section {
+  margin-bottom: 22px;
+}
+
+.header-section h4 {
+  margin: 0 0 11px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+/* Header explanations */
+
+.header-explanation {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.header-explanation p {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.header-explanation p:last-child {
+  margin-bottom: 0;
+}
+
+.header-explanation strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* Full original header details */
+
+.full-header-details {
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.full-header-details summary {
+  padding: 14px;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.full-header-details summary:hover {
+  background: var(--blue-light);
+}
+
+.full-header-details[open] summary {
+  border-bottom: 1px solid var(--border);
+}
+
+.full-header-details > .headers-intro {
+  margin: 14px;
+}
+
+.full-header-details .header-list {
+  padding: 0 12px 12px;
+}
