@@ -122,7 +122,7 @@ window.addEventListener("message", (event) => {
   document.getElementById("auth-dmarc").textContent =
     getAuthStatus("dmarc");
   */
- 
+
   // Assign to green, yellow, red
   function displayAuthStatus(elementId, type) {
     const element = document.getElementById(elementId);
@@ -148,6 +148,43 @@ window.addEventListener("message", (event) => {
   displayAuthStatus("auth-spf", "spf");
   displayAuthStatus("auth-dkim", "dkim");
   displayAuthStatus("auth-dmarc", "dmarc");
+
+  /**Updated INFO */
+  function getAuthDescription(type, status) {
+    const descriptions = {
+      spf: {
+        PASS: "The sending server passed the domain's SPF authentication check.",
+        FAIL: "The sending server failed the domain's SPF authentication check.",
+        MIXED: "Multiple SPF results were found and they differed.",
+        "NEEDS REVIEW": "The SPF result could not be clearly determined."
+      },
+      dkim: {
+        PASS: "At least one DKIM signature passed verification.",
+        FAIL: "The DKIM signature or signatures failed verification.",
+        MIXED: "Some DKIM signatures passed while others failed.",
+        "NEEDS REVIEW": "The DKIM result could not be clearly determined."
+      },
+      dmarc: {
+        PASS: "The email passed the domain's DMARC authentication and alignment requirements.",
+        FAIL: "The email failed the domain's DMARC authentication requirements.",
+        MIXED: "Multiple DMARC results were found and they differed.",
+        "NEEDS REVIEW": "The DMARC result could not be clearly determined."
+      }
+    };
+
+    return descriptions[type][status] || "Authentication information is unavailable.";
+  }
+
+  function displayAuthDescription(elementId, type) {
+    const status = getAuthStatus(type);
+
+    document.getElementById(elementId).textContent =
+      getAuthDescription(type, status);
+  }
+
+  displayAuthDescription("auth-spf-description", "spf");
+  displayAuthDescription("auth-dkim-description", "dkim");
+  displayAuthDescription("auth-dmarc-description", "dmarc");
 
   // Technical Details
   document.getElementById("display-return-path").textContent =
