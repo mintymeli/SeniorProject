@@ -68,40 +68,76 @@
               <div class="header-label">From</div>
               <p class="header-value" id="display-from">Waiting for data...</p>
 
-              <div class="header-explanation">
-                <p><strong>What it means:</strong> Identifies the sender's name and email address shown in the message.</p>
-                <p><strong>Why it matters:</strong> Helps you identify who appears to have sent the email.</p>
-              </div>
+              <!--**-->
+              <details class="header-explanation">
+                <summary aria-label="Show explanation">
+                  <span class="explanation-arrow"></span>
+                </summary>
+
+                <div class="explanation-content">
+                  <!-- Keep the existing What it means and Why it matters paragraphs here -->
+                  <p><strong>What it means:</strong> Identifies the sender's name and email address shown in the message.</p>
+                  <p><strong>Why it matters:</strong> Helps you identify who appears to have sent the email.</p>
+                </div>
+              </details>
+              <!--**-->
             </div>
 
             <div class="header-item">
               <div class="header-label">Subject</div>
               <p class="header-value" id="display-subject">Waiting for data...</p>
 
-              <div class="header-explanation">
-                <p><strong>What it means:</strong> The subject line describes what the email is about.</p>
-                <p><strong>Why it matters:</strong> Provides context about the message and what the sender wants you to notice.</p>
-              </div>
+              <!--**-->
+              <details class="header-explanation">
+                <summary aria-label="Show explanation">
+                  <span class="explanation-arrow"></span>
+                </summary>
+
+                <div class="explanation-content">
+                  <!-- Keep the existing What it means and Why it matters paragraphs here -->
+                  <p><strong>What it means:</strong> The subject line describes what the email is about.</p>
+                  <p><strong>Why it matters:</strong> Provides context about the message and what the sender wants you to notice.</p>
+                </div>
+              </details>
+              <!--**-->
             </div>
 
             <div class="header-item">
               <div class="header-label">Date</div>
               <p class="header-value" id="display-date">Waiting for data...</p>
 
-              <div class="header-explanation">
-                <p><strong>What it means:</strong> Shows the date and time associated with the email.</p>
-                <p><strong>Why it matters:</strong> Helps establish when the message was sent and understand its timeline.</p>
-              </div>
+              <!--**-->          
+              <details class="header-explanation">
+                <summary aria-label="Show explanation">
+                  <span class="explanation-arrow"></span>
+                </summary>
+
+                <div class="explanation-content">
+                  <!-- Keep the existing What it means and Why it matters paragraphs here -->
+                  <p><strong>What it means:</strong> Shows the date and time associated with the email.</p>
+                  <p><strong>Why it matters:</strong> Helps establish when the message was sent and understand its timeline.</p>
+                </div>
+              </details>
+              <!--**-->
             </div>
 
             <div class="header-item">
               <div class="header-label">Reply-To</div>
               <p class="header-value" id="display-reply-to">Waiting for data...</p>
 
-              <div class="header-explanation">
-                <p><strong>What it means:</strong> Identifies the address where replies to the email are directed.</p>
-                <p><strong>Why it matters:</strong> Helps you understand whether a response would go to the original sender or a different address.</p>
-              </div>
+              <!--**-->
+              <details class="header-explanation">
+                <summary aria-label="Show explanation">
+                  <span class="explanation-arrow"></span>
+                </summary>
+
+                <div class="explanation-content">
+                  <!-- Keep the existing What it means and Why it matters paragraphs here -->
+                  <p><strong>What it means:</strong> Identifies the address where replies to the email are directed.</p>
+                  <p><strong>Why it matters:</strong> Helps you understand whether a response would go to the original sender or a different address.</p>
+                </div>
+              </details>
+              <!--**-->
             </div>
 
           </div>
@@ -117,30 +153,57 @@
               <div class="header-label">SPF</div>
               <p class="header-value" id="auth-spf">Waiting for data...</p>
 
-              <div class="header-explanation">
-                <p><strong>What it means:</strong> Checks whether the server sending the email is authorized to send messages for the evaluated domain.</p>
-                <p><strong>Why it matters:</strong> Helps identify emails sent from servers that may not be authorized by the domain owner.</p>
-              </div>
+              <!--**-->
+              <details class="header-explanation">
+                <summary aria-label="Show explanation">
+                  <span class="explanation-arrow"></span>
+                </summary>
+
+                <div class="explanation-content">
+                  <!-- Keep the existing What it means and Why it matters paragraphs here -->
+                  <p><strong>What it means:</strong> Checks whether the server sending the email is authorized to send messages for the evaluated domain.</p>
+                  <p><strong>Why it matters:</strong> Helps identify emails sent from servers that may not be authorized by the domain owner.</p>
+                </div>
+              </details>
+              <!--**-->
             </div>
 
             <div class="header-item">
               <div class="header-label">DKIM</div>
               <p class="header-value" id="auth-dkim">Waiting for data...</p>
 
-              <div class="header-explanation">
-                <p><strong>What it means:</strong> Uses a digital signature to verify that signed portions of the email have not been altered.</p>
-                <p><strong>Why it matters:</strong> Helps verify the integrity of the signed email content and its association with a signing domain.</p>
-              </div>
+              <!--**-->
+              <details class="header-explanation">
+                <summary aria-label="Show explanation">
+                  <span class="explanation-arrow"></span>
+                </summary>
+
+                <div class="explanation-content">
+                  <!-- Keep the existing What it means and Why it matters paragraphs here -->
+                  <p><strong>What it means:</strong> Uses a digital signature to verify that signed portions of the email have not been altered.</p>
+                  <p><strong>Why it matters:</strong> Helps verify the integrity of the signed email content and its association with a signing domain.</p>
+                </div>
+              </details>
+              <!--**-->
             </div>
 
             <div class="header-item">
               <div class="header-label">DMARC</div>
               <p class="header-value" id="auth-dmarc">Waiting for data...</p>
 
-              <div class="header-explanation">
-                <p><strong>What it means:</strong> Checks whether SPF or DKIM authentication aligns with the domain shown in the sender's address.</p>
-                <p><strong>Why it matters:</strong> Helps domain owners protect their domains against unauthorized use and email spoofing.</p>
-              </div>
+              <!--**-->
+              <details class="header-explanation">
+                <summary aria-label="Show explanation">
+                  <span class="explanation-arrow"></span>
+                </summary>
+
+                <div class="explanation-content">
+                  <!-- Keep the existing What it means and Why it matters paragraphs here -->
+                  <p><strong>What it means:</strong> Checks whether SPF or DKIM authentication aligns with the domain shown in the sender's address.</p>
+                  <p><strong>Why it matters:</strong> Helps domain owners protect their domains against unauthorized use and email spoofing.</p>
+                </div>
+              </details>
+              <!--**-->
             </div>
 
           </div>
@@ -156,20 +219,38 @@
               <div class="header-label">Return-Path</div>
               <p class="header-value" id="display-return-path">Waiting for data...</p>
 
-              <div class="header-explanation">
-                <p><strong>What it means:</strong> Identifies the address used to handle email delivery failure notifications.</p>
-                <p><strong>Why it matters:</strong> Provides information about the email's delivery process and can help with SPF authentication.</p>
-              </div>
+              <!--**-->
+              <details class="header-explanation">
+                <summary aria-label="Show explanation">
+                  <span class="explanation-arrow"></span>
+                </summary>
+
+                <div class="explanation-content">
+                  <!-- Keep the existing What it means and Why it matters paragraphs here -->
+                  <p><strong>What it means:</strong> Identifies the address used to handle email delivery failure notifications.</p>
+                  <p><strong>Why it matters:</strong> Provides information about the email's delivery process and can help with SPF authentication.</p>
+                </div>
+              </details>
+              <!--**-->
             </div>
 
             <div class="header-item">
               <div class="header-label">Received</div>
               <div class="header-value" id="display-received">Waiting for data...</div>
 
-              <div class="header-explanation">
-                <p><strong>What it means:</strong> Records the mail servers involved as the email travels from its sender to its destination.</p>
-                <p><strong>Why it matters:</strong> Helps trace the email's delivery route and identify server information, timestamps, and IP addresses for further analysis.</p>
-              </div>
+              <!--**-->
+              <details class="header-explanation">
+                <summary aria-label="Show explanation">
+                  <span class="explanation-arrow"></span>
+                </summary>
+
+                <div class="explanation-content">
+                  <!-- Keep the existing What it means and Why it matters paragraphs here -->
+                  <p><strong>What it means:</strong> Records the mail servers involved as the email travels from its sender to its destination.</p>
+                  <p><strong>Why it matters:</strong> Helps trace the email's delivery route and identify server information, timestamps, and IP addresses for further analysis.</p>
+                </div>
+              </details>
+              <!--**-->
             </div>
 
           </div>

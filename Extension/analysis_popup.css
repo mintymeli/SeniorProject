@@ -318,12 +318,13 @@ body {
 }
 
 /* Header explanations */
-
+/**
 .header-explanation {
   margin-top: 12px;
   padding-top: 10px;
   border-top: 1px solid var(--border);
 }
+**/
 
 .header-explanation p {
   margin: 0 0 8px;
@@ -374,4 +375,67 @@ body {
 
 .full-header-details .header-list {
   padding: 0 12px 12px;
+}
+
+/* Expandable header explanations */
+.header-explanation {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 4px;
+}
+
+.header-explanation summary {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.header-explanation summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Small arrow */
+.explanation-arrow::after {
+  content: "⌵";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--blue-light);
+  color: var(--blue);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.header-explanation[open] .explanation-arrow::after {
+  content: "˄";
+  font-size: 16px;
+  font-weight: 230;
+}
+
+/* Explanation text: no border, so it reads as one section with the arrow */
+.explanation-content {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.explanation-content p {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.explanation-content p:last-child {
+  margin-bottom: 0;
+}
+
+.explanation-content strong {
+  color: var(--ink);
+  font-weight: 700;
 }
