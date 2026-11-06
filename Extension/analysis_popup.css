@@ -439,3 +439,31 @@ body {
   color: var(--ink);
   font-weight: 700;
 }
+
+/* Authentication status colors */
+.auth-pass {
+  color: #25855a;
+  background: #e8f7ef;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.auth-fail {
+  color: #c03939;
+  background: #fdecec;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.auth-review {
+  color: #946200;
+  background: #fff4d6;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 6px;
+  display: inline-block;
+}

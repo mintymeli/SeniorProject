@@ -62,13 +62,92 @@ window.addEventListener("message", (event) => {
 
 
   // Authentication
+  /**
   const authResults =
     headers.authentication_results?.join("\n\n") || "Not provided";
 
   document.getElementById("auth-spf").textContent = authResults;
   document.getElementById("auth-dkim").textContent = authResults;
   document.getElementById("auth-dmarc").textContent = authResults;
+  */
 
+  // Authentication
+  const authResults =
+    headers.authentication_results?.join("\n\n") || "";
+
+  function getAuthStatus(type) {
+    const matches = [
+      ...authResults.matchAll(
+        new RegExp(
+          `\\b${type}=(pass|fail|softfail|neutral|none|temperror|permerror)\\b`,
+          "gi"
+        )
+      )
+    ].map(match => match[1].toLowerCase());
+
+    if (matches.length === 0) {
+      return "NOT AVAILABLE";
+    }
+
+    const hasPass = matches.includes("pass");
+    const hasFail = matches.some(status =>
+      ["fail", "softfail", "permerror"].includes(status)
+    );
+
+    // Handle multiple DKIM signatures
+    if (type === "dkim" && matches.length > 1) {
+      if (hasPass && hasFail) return "MIXED";
+      if (hasFail) return "FAIL";
+      if (hasPass) return "PASS";
+    }
+
+    const status = matches[0];
+
+    if (status === "pass") return "PASS";
+
+    if (["fail", "softfail", "permerror"].includes(status)) {
+      return "FAIL";
+    }
+
+    return "NEEDS REVIEW";
+  }
+
+  /** UPDATE
+  document.getElementById("auth-spf").textContent =
+    getAuthStatus("spf");
+
+  document.getElementById("auth-dkim").textContent =
+    getAuthStatus("dkim");
+
+  document.getElementById("auth-dmarc").textContent =
+    getAuthStatus("dmarc");
+  */
+ 
+  // Assign to green, yellow, red
+  function displayAuthStatus(elementId, type) {
+    const element = document.getElementById(elementId);
+    const status = getAuthStatus(type);
+
+    element.textContent = status;
+
+    element.classList.remove(
+      "auth-pass",
+      "auth-fail",
+      "auth-review"
+    );
+
+    if (status === "PASS") {
+      element.classList.add("auth-pass");
+    } else if (status === "FAIL") {
+      element.classList.add("auth-fail");
+    } else {
+      element.classList.add("auth-review");
+    }
+  }
+
+  displayAuthStatus("auth-spf", "spf");
+  displayAuthStatus("auth-dkim", "dkim");
+  displayAuthStatus("auth-dmarc", "dmarc");
 
   // Technical Details
   document.getElementById("display-return-path").textContent =
