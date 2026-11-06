@@ -17,3 +17,6 @@ IPQS_API_KEY = os.getenv("IPQS_API_KEY")
 
 # Retrived URLScan.io API Key
 URLSCAN_API_KEY = os.getenv("URLSCAN_API_KEY")
+
+# Retrives URLHaus API Key
+URLHAUS_API_KEY = os.getenv("URLHAUS_API_KEY")

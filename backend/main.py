@@ -275,20 +275,20 @@ async def analyze_email(request: Request):
             safe_output = (
                 "Yes" if safe is True
                 else "No" if safe is False
-                else "N/A"
+                else "Not found"
             )
 
-            print(f"URL: {result.get('url', 'N/A')}")
+            print(f"URL: {result.get('url', 'Not found')}")
             print(f"Safe: {safe_output}")
-            print(f"Suspicious: {result.get('suspicious', 'N/A')}")
-            print(f"Domain: {result.get('domain', 'N/A')}")
-            print(f"Malware: {result.get('malware', 'N/A')}")
-            print(f"Phishing: {result.get('phishing', 'N/A')}")
-            print(f"Risk Score: {result.get('risk_score', 'N/A')}")
-            print(f"Domain Age: {result.get('domain_age') or 'N/A'}")
+            print(f"Suspicious: {result.get('suspicious', 'Not found')}")
+            print(f"Domain: {result.get('domain', 'Not found')}")
+            print(f"Malware: {result.get('malware', 'Not found')}")
+            print(f"Phishing: {result.get('phishing', 'Not found')}")
+            print(f"Risk Score: {result.get('risk_score', 'Not found')}")
+            print(f"Domain Age: {result.get('domain_age') or 'Not found'}")
             print()
     else:
-        print("No URLs found for IPQS analysis.") 
+        print("No URLs found for analysis.") 
 
     # URLscan.io analysis results
     print("\n🐟 URLSCAN.IO URL ANALYSIS:")
@@ -316,6 +316,33 @@ async def analyze_email(request: Request):
 
             else:
                 print(result.get("message", result.get("error", "Report unavailable.")))
+
+            print()
+
+    else:
+        print("No URLs found for analysis.")
+
+    # URLHaus Analysis Results
+    print("\n🐟 URLHAUS URL ANALYSIS:")
+
+    if threat_intel_results["urlhaus_results"]:
+
+        for result in threat_intel_results["urlhaus_results"]:
+
+            print(f"URL: {result.get('url') or 'Not found'}")
+            print(f"URL Status: {result.get('url_status') or 'Not found'}")
+
+            if result.get("url_status") not in ["Not found", "Error"]:
+
+                print(f"Host: {result.get('host') or 'Not found'}")
+                print(f"Date Added: {result.get('date_added') or 'Not found'}")
+                print(f"Threat: {result.get('threat') or 'Not found'}")
+                print(f"URLhaus Blocklist: {result.get('urlhaus_blocklist') or 'Not found'}")
+                print(f"Spamhaus DBL: {result.get('spamhaus_dbl') or 'Not found'}")
+                print(f"SURBL: {result.get('surbl') or 'Not found'}")
+
+            elif result.get("url_status") == "Error":
+                print(f"Error: {result.get('error') or 'Analysis unavailable.'}")
 
             print()
 

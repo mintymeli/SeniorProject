@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from config import VIRUSTOTAL_API_KEY
 from config import IPQS_API_KEY
 from config import URLSCAN_API_KEY
+from config import URLHAUS_API_KEY
 
 
 # ----- VirusTotal Analysis -----
@@ -228,13 +229,13 @@ def analyze_url_ipqs(url):
         return {
             "url": url,
             "status": "Report found",
-            "safe": not unsafe if isinstance(unsafe, bool) else None,
-            "suspicious": data.get("suspicious"),
-            "domain": data.get("domain"),
-            "malware": data.get("malware"),
-            "phishing": data.get("phishing"),
-            "risk_score": data.get("risk_score"),
-            "domain_age": domain_age
+            "safe": not unsafe if isinstance(unsafe, bool) else "Not found",
+            "suspicious": data.get("suspicious", "Not found"),
+            "domain": data.get("domain") or "Not found",
+            "malware": data.get("malware", "Not found"),
+            "phishing": data.get("phishing", "Not found"),
+            "risk_score": data.get("risk_score", "Not found"),
+            "domain_age": domain_age or "Not found"
         }
 
     # Handles connection problems
@@ -341,8 +342,6 @@ def get_domain_info(domain):
         }
 
     except (httpx.RequestError, ValueError, TypeError, KeyError) as e:
-
-        print(f"[RDAP] Error: {e}")
 
         return {
             "domain_created": "Not found.",
@@ -491,7 +490,116 @@ def analyze_urlscan(url):
             "status": "Error",
             "message": "Could not read the URLscan response."
         }
+
+# ----- URLhaus Analysis -----
     
+# Checks whether a URL is listed in the URLhaus malware database
+def analyze_url_urlhaus(url):
+
+    # Checks if the API key is configured
+    if not URLHAUS_API_KEY:
+        return {
+            "url": url,
+            "url_status": "Error",
+            "error": "URLhaus Auth-Key is not configured."
+        }
+
+    # URLhaus API address
+    endpoint = "https://urlhaus-api.abuse.ch/v1/url/"
+
+    # Headers needed to connect to URLhaus
+    headers = {
+        "Auth-Key": URLHAUS_API_KEY,
+        "User-Agent": "PhishCatcher/1.0"
+    }
+
+    # Sends the URL to URLhaus to check it
+    try:
+        response = httpx.post(
+            endpoint,
+            headers=headers,
+            data={"url": url},
+            timeout=20
+        )
+
+        # Checks if the request was successful
+        if response.status_code != 200:
+            return {
+                "url": url,
+                "url_status": "Error",
+                "error": f"URLhaus returned HTTP {response.status_code}."
+            }
+
+        # Gets the results from URLhaus
+        data = response.json()
+
+        query_status = data.get("query_status")
+
+        # Returns a message if the URL was not found
+        if query_status == "no_results":
+            return {
+                "url": url,
+                "url_status": "Not found"
+            }
+
+        # Checks if URLhaus returned a valid report
+        if query_status != "ok":
+            return {
+                "url": url,
+                "url_status": "Error",
+                "error": f"URLhaus query status: {query_status or 'Unknown'}"
+            }
+
+        # Gets Spamhaus and SURBL results
+        blacklists = data.get("blacklists", {}) or {}
+
+        spamhaus = blacklists.get("spamhaus_dbl", "Unknown")
+        surbl = blacklists.get("surbl", "Unknown")
+
+        # Converts Spamhaus results into a simple status
+        if spamhaus == "not listed":
+            spamhaus_status = "Not blocked"
+        elif spamhaus == "listed":
+            spamhaus_status = "Blocked"
+        else:
+            spamhaus_status = "Unknown"
+
+        # Converts SURBL results into a simple status
+        if surbl == "not listed":
+            surbl_status = "Not blocked"
+        elif surbl == "listed":
+            surbl_status = "Blocked"
+        else:
+            surbl_status = "Unknown"
+
+        # Returns URLhaus analysis results
+        return {
+            "url": url,
+            "url_status": data.get("url_status", "N/A"),
+            "host": data.get("host", "N/A"),
+            "date_added": data.get("date_added", "N/A"),
+            "threat": data.get("threat", "N/A"),
+            "urlhaus_blocklist": "Blocked",
+            "spamhaus_dbl": spamhaus_status,
+            "surbl": surbl_status
+        }
+
+    # Handles connection problems
+    except httpx.RequestError:
+        return {
+            "url": url,
+            "url_status": "Error",
+            "error": "Could not connect to URLhaus."
+        }
+
+    # Handles errors when reading the results
+    except (ValueError, TypeError, KeyError):
+        return {
+            "url": url,
+            "url_status": "Error",
+            "error": "Could not read the URLhaus response."
+        }
+
 # ----- Email Threat Intel Analysis -----
 
 def analyze_tools(urls, attachment_hashes):
@@ -501,7 +609,8 @@ def analyze_tools(urls, attachment_hashes):
         "url_results": [],
         "file_hash_results": [],
         "ipqs_results": [],
-        "urlscan_results": []
+        "urlscan_results": [],
+        "urlhaus_results": []
     }
 
     # Store all checks that will run
@@ -535,6 +644,14 @@ def analyze_tools(urls, attachment_hashes):
                 url,
                 "url",
                 executor.submit(analyze_urlscan, url)
+            ))
+
+            # Starts checking the same URL with URLhaus
+            tasks.append((
+                "urlhaus_results",
+                url,
+                "url",
+                executor.submit(analyze_url_urlhaus, url)
             ))
 
         # Keeps track of attachment hashes we have already checked
