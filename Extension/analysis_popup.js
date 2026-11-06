@@ -206,7 +206,7 @@ window.addEventListener("message", (event) => {
   document.getElementById("display-received").innerHTML =
     receivedValue
       ? `<span class="received-label">SENDING SERVER:\n</span> ${receivedServer}
-        <br><span class="received-label">SERVER IP:\n</span> ${receivedIP}
+        <br><span class="received-label">SERVER IP:</span> <span class="info-icon" title="The IP address of the mail server that handled the email.">ⓘ\n</span> ${receivedIP}
         <br><span class="received-label">RECEIVED DATE:\n</span> ${receivedDate}`
       : "Not provided";
 
