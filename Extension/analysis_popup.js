@@ -190,8 +190,25 @@ window.addEventListener("message", (event) => {
   document.getElementById("display-return-path").textContent =
     headers.return_path?.split("@")[1]?.replace(/[<>]/g, "") || "Not provided";
 
-  document.getElementById("display-received").textContent =
-    headers.received?.join("\n\n") || "Not provided";
+  /** Parse displayed received */
+  // Friendly Received display
+  const receivedValue = headers.received?.join("\n\n") || "";
+
+  const receivedServer =
+    receivedValue.match(/from\s+([^\s(]+)/i)?.[1] || "Not available";
+
+  const receivedIP =
+    receivedValue.match(/\[([\d.]+)\]/)?.[1] || "Not available";
+
+  const receivedDate =
+    receivedValue.match(/;\s*([A-Za-z]{3},.+)$/m)?.[1] || "Not available";
+
+  document.getElementById("display-received").innerHTML =
+    receivedValue
+      ? `<span class="received-label">SENDING SERVER:\n</span> ${receivedServer}
+        <br><span class="received-label">SERVER IP:\n</span> ${receivedIP}
+        <br><span class="received-label">RECEIVED DATE:\n</span> ${receivedDate}`
+      : "Not provided";
 
 
   // Original Header Values
