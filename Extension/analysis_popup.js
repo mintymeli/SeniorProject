@@ -53,10 +53,12 @@ window.addEventListener("message", (event) => {
     headers.subject || "Not provided";
 
   document.getElementById("display-date").textContent =
-    headers.date || "Not provided";
+    headers.date
+      ? new Date(headers.date).toLocaleString()
+      : "Not provided";
 
   document.getElementById("display-reply-to").textContent =
-    headers.reply_to || "Not provided";
+    headers.reply_to?.split("@")[1] || "Not provided";
 
 
   // Authentication
@@ -70,7 +72,7 @@ window.addEventListener("message", (event) => {
 
   // Technical Details
   document.getElementById("display-return-path").textContent =
-    headers.return_path || "Not provided";
+    headers.return_path?.split("@")[1]?.replace(/[<>]/g, "") || "Not provided";
 
   document.getElementById("display-received").textContent =
     headers.received?.join("\n\n") || "Not provided";
