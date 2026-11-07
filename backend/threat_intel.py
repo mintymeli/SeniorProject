@@ -10,6 +10,7 @@ from config import VIRUSTOTAL_API_KEY
 from config import IPQS_API_KEY
 from config import URLSCAN_API_KEY
 from config import URLHAUS_API_KEY
+from config import MALWAREBAZAAR_API_KEY
 
 
 # ----- VirusTotal Analysis -----
@@ -600,6 +601,110 @@ def analyze_url_urlhaus(url):
             "error": "Could not read the URLhaus response."
         }
 
+# ----- MalwareBazaar Analysis -----
+
+# Checks if an attachment hash is listed in MalwareBazaar
+def analyze_hash_malwarebazaar(file_hash):
+
+    # Checks if the API key is available
+    if not MALWAREBAZAAR_API_KEY:
+        return {
+            "hash": file_hash,
+            "status": "Error",
+            "error": "MalwareBazaar API key is not configured."
+        }
+
+    # MalwareBazaar API address
+    endpoint = "https://mb-api.abuse.ch/api/v1/"
+
+    # Adds the API Key needed to access MalwareBazaar
+    headers = {
+        "Auth-Key": MALWAREBAZAAR_API_KEY
+    }
+
+    # Sends the hash to MalwareBazaar for a lookup
+    try:
+        response = httpx.post(
+            endpoint,
+            headers=headers,
+            data={
+                "query": "get_info",
+                "hash": file_hash
+            },
+            timeout=20
+        )
+
+        # Checks if the request was successful
+        if response.status_code != 200:
+            return {
+                "hash": file_hash,
+                "status": "Error",
+                "error": f"MalwareBazaar returned HTTP {response.status_code}."
+            }
+
+        # Gets the results from MalwareBazaar
+        data = response.json()
+
+        # Gets the status of the hash lookup
+        query_status = data.get("query_status")
+
+        # Returns a message if the hash was not found
+        if query_status == "hash_not_found":
+            return {
+                "hash": file_hash,
+                "status": "Not found"
+            }
+
+        # Checks if MalwareBazaar returned an unexpected response
+        if query_status != "ok":
+            return {
+                "hash": file_hash,
+                "status": "Error",
+                "error": f"MalwareBazaar query status: {query_status or 'Unknown'}"
+            }
+
+        # Gets the malware report information
+        malware_data = data.get("data", [])
+
+        # Checks if the report contain any information
+        if not malware_data:
+            return {
+                "hash": file_hash,
+                "status": "Not found"
+            }
+
+        # Retrives the first matching malware report
+        malware = malware_data[0]
+
+        # Returns the hash and information from the malware report
+        return {
+            "hash": file_hash,
+            "status": "Report found",
+            "sha256_hash": malware.get("sha256_hash"),
+            "file_name": malware.get("file_name"),
+            "file_type": malware.get("file_type"),
+            "file_type_mime": malware.get("file_type_mime"),
+            "file_size": malware.get("file_size"),
+            "first_seen": malware.get("first_seen"),
+            "last_seen": malware.get("last_seen")
+        }
+
+    # Handles connection errors
+    except httpx.RequestError:
+        return {
+            "hash": file_hash,
+            "status": "Error",
+            "error": "Could not connect to MalwareBazaar."
+        }
+
+    # Handles errors when reading the results
+    except (ValueError, TypeError, KeyError):
+        return {
+            "hash": file_hash,
+            "status": "Error",
+            "error": "Could not read the MalwareBazaar response."
+        }
+
 # ----- Email Threat Intel Analysis -----
 
 def analyze_tools(urls, attachment_hashes):
@@ -610,7 +715,8 @@ def analyze_tools(urls, attachment_hashes):
         "file_hash_results": [],
         "ipqs_results": [],
         "urlscan_results": [],
-        "urlhaus_results": []
+        "urlhaus_results": [],
+        "malwarebazaar_results": []
     }
 
     # Store all checks that will run
@@ -676,6 +782,14 @@ def analyze_tools(urls, attachment_hashes):
                 file_hash,
                 "file_hash",
                 executor.submit(analyze_hash_virustotal, file_hash)
+            ))
+
+            # Starts checking hash with MalwareBazaar
+            tasks.append((
+                "malwarebazaar_results",
+                file_hash,
+                "hash",
+                executor.submit(analyze_hash_malwarebazaar, file_hash)
             ))
 
         # Collects each results

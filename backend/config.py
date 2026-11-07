@@ -20,3 +20,6 @@ URLSCAN_API_KEY = os.getenv("URLSCAN_API_KEY")
 
 # Retrives URLHaus API Key
 URLHAUS_API_KEY = os.getenv("URLHAUS_API_KEY")
+
+# Retrives MalwareBazaar API Key
+MALWAREBAZAAR_API_KEY = os.getenv("MALWAREBAZAAR_API_KEY")

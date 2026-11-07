@@ -330,24 +330,55 @@ async def analyze_email(request: Request):
         for result in threat_intel_results["urlhaus_results"]:
 
             print(f"URL: {result.get('url') or 'Not found'}")
-            print(f"URL Status: {result.get('url_status') or 'Not found'}")
 
-            if result.get("url_status") not in ["Not found", "Error"]:
-
-                print(f"Host: {result.get('host') or 'Not found'}")
-                print(f"Date Added: {result.get('date_added') or 'Not found'}")
-                print(f"Threat: {result.get('threat') or 'Not found'}")
-                print(f"URLhaus Blocklist: {result.get('urlhaus_blocklist') or 'Not found'}")
-                print(f"Spamhaus DBL: {result.get('spamhaus_dbl') or 'Not found'}")
-                print(f"SURBL: {result.get('surbl') or 'Not found'}")
+            if result.get("url_status") == "Not found":
+                print("No report found.")
 
             elif result.get("url_status") == "Error":
                 print(f"Error: {result.get('error') or 'Analysis unavailable.'}")
+
+            else:
+                print(f"URL Status: {result.get('url_status') or 'Not found'}")
+
+                print(f"Host: {result.get('host') or 'Not found'}")
+                print(f"Date Added: {result.get('date_added') or 'Not found'}")
+                print(f"Threat: {result.get('threat', 'Not found').replace('_', ' ')}")
+                print(f"URLhaus Blocklist: {result.get('urlhaus_blocklist') or 'Not found'}")
+                print(f"Spamhaus DBL: {result.get('spamhaus_dbl') or 'Not found'}")
+                print(f"SURBL: {result.get('surbl') or 'Not found'}")
 
             print()
 
     else:
         print("No URLs found for analysis.")
+
+    # MalwareBazaar Analysis Results
+    print("\n🐟 MALWAREBAZAAR HASH ANALYSIS:")
+
+    if threat_intel_results["malwarebazaar_results"]:
+
+        for result in threat_intel_results["malwarebazaar_results"]:
+
+            print(f"SHA-256: {result.get('hash') or 'Not found'}")
+
+            if result.get("status") == "Not found":
+                print("No report found.")
+
+            elif result.get("status") == "Report found":
+
+                print(f"File Name: {result.get('file_name') or 'Not found'}")
+                print(f"File Type: {result.get('file_type') or 'Not found'}")
+                print(f"File MIME Type: {result.get('file_type_mime') or 'Not found'}")
+                print(f"File size: {result.get('file_size') or 'Not found'}")
+                print(f"First Seen: {result.get('first_seen') or 'Not found'}")
+                print(f"Last Seen: {result.get('last_seen') or 'Not found'}")
+
+            elif result.get("status") == "Error":
+                print(f"Error: {result.get('error') or 'Analysis unavailable.'}")
+            print()
+
+    else:
+        print("No attachment hashes found for analysis.")
 
     # 5. Send a quick success message back to the Chrome Extension
     return {
