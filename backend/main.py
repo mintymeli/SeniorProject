@@ -98,6 +98,21 @@ async def analyze_email(request: Request):
     # 2. Navigate to where Google stores headers inside the JSON
     headers = email_json.get('payload', {}).get('headers', [])
 
+    # TEMPORARY
+    '''
+    print("\n--- HI AUTHENTICATION-RELATED HEADERS ---")
+
+    for h in headers:
+        name = h.get("name", "").lower()
+
+        if name in (
+            "authentication-results",
+            "arc-authentication-results",
+            "received",
+            "received-spf"
+        ):
+            print(f"{h.get('name')}: {h.get('value')}")
+    '''
 
     '''
     # 3. Pull out the specific headers we want to read

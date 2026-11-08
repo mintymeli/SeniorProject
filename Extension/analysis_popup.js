@@ -70,10 +70,26 @@ window.addEventListener("message", (event) => {
   document.getElementById("auth-dkim").textContent = authResults;
   document.getElementById("auth-dmarc").textContent = authResults;
   */
+ // Authentication UPDATED
+  // Preserve all original authentication results
+  const allAuthResults =
+    headers.authentication_results?.join("\n\n") || "Not provided";
+
+  // Select Google's results for status calculations
+  const googleAuthResults = (headers.authentication_results || []).filter(
+    result => /^\s*mx\.google\.com\s*;/i.test(result)
+  );
+
+  const authResults = googleAuthResults.join("\n\n");
+  
 
   // Authentication
+  /** CHECKING SPF  
   const authResults =
     headers.authentication_results?.join("\n\n") || "";
+  */
+  // const authResults = "spf=pass"; // test SPF pass
+  //const authResults = "spf=fail"; // test SPF fail
 
   function getAuthStatus(type) {
     const matches = [
@@ -95,7 +111,10 @@ window.addEventListener("message", (event) => {
     );
 
     // Handle multiple DKIM signatures
-    if (type === "dkim" && matches.length > 1) {
+    // if (type === "dkim" && matches.length > 1) {
+
+    // Handles multiple SPF DKIM DMARC signatures
+    if (matches.length > 1) {
       if (hasPass && hasFail) return "MIXED";
       if (hasFail) return "FAIL";
       if (hasPass) return "PASS";
@@ -227,8 +246,12 @@ window.addEventListener("message", (event) => {
   document.getElementById("header-return-path").textContent =
     headers.return_path || "Not provided";
 
-  document.getElementById("header-auth-results").textContent =
+  /**document.getElementById("header-auth-results").textContent =
     authResults;
+  */
+ // UPDATED: includes all authentication results
+  document.getElementById("header-auth-results").textContent =
+  allAuthResults;
 
   document.getElementById("header-received").textContent =
     headers.received?.join("\n\n") || "Not provided";
