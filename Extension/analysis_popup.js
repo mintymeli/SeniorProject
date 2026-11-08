@@ -328,16 +328,18 @@ window.addEventListener("message", (event) => {
 
     const categoryLabel = document.createElement("p");
     categoryLabel.textContent = category;
+    // UPDATE
+    categoryLabel.classList.add("finding-category");
 
     //const explanationText = document.createElement("p");
     //explanationText.textContent = explanation;
-    const meaningLabel = document.createElement("p");
+    const meaningLabel = document.createElement("strong");
     meaningLabel.textContent = "What it means";
 
     const meaningText = document.createElement("p");
     meaningText.textContent = explanation.meaning;
 
-    const whyLabel = document.createElement("p");
+    const whyLabel = document.createElement("strong");
     whyLabel.textContent = "Why it matters";
 
     const whyText = document.createElement("p");
@@ -350,6 +352,7 @@ window.addEventListener("message", (event) => {
 
     // Technical details content
     const technicalContent = document.createElement("p");
+    technicalContent.classList.add("finding-technical-details");
     technicalContent.textContent = technicalDetails;
     technicalContent.hidden = true;
 

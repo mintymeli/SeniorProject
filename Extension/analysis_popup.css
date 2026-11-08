@@ -556,6 +556,28 @@ body {
   margin: 8px 0;
 }
 
+.finding-category {
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.finding-content strong {
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.finding-content p:not(:first-child) {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.finding-content p.finding-technical-details {
+  color: var(--ink);
+}
+
 .finding-technical-button {
   margin-top: 10px;
   padding: 8px 11px;
@@ -572,4 +594,8 @@ body {
 
 .finding-technical-button:hover {
   background: #dfe9ff;
+}
+
+.finding-technical-details {
+  color: var(--ink);
 }
