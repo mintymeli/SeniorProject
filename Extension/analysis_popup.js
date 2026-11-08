@@ -205,6 +205,43 @@ window.addEventListener("message", (event) => {
   displayAuthDescription("auth-dkim-description", "dkim");
   displayAuthDescription("auth-dmarc-description", "dmarc");
 
+  // UPDATE: included authen findings
+  // Generate authentication findings
+  const findingsContainer = document.getElementById("findings-container");
+  findingsContainer.innerHTML = "";
+
+  let authFindingsCount = 0;
+
+  ["spf", "dkim", "dmarc"].forEach(type => {
+    const status = getAuthStatus(type);
+
+    if (status === "FAIL" || status === "MIXED") {
+      const title = `${type.toUpperCase()} authentication ${status.toLowerCase()}`;
+
+      const explanation = getAuthDescription(type, status);
+
+      const technicalDetails = authResults
+        .split(";")
+        .filter(part => new RegExp(`\\b${type}=`, "i").test(part))
+        .join(";")
+        .trim();
+
+      addFinding(
+        title,
+        `Authentication · ${type.toUpperCase()}`,
+        explanation,
+        technicalDetails || "No matching technical details available."
+      );
+
+      authFindingsCount++;
+    }
+  });
+
+  if (authFindingsCount === 0) {
+    findingsContainer.textContent =
+      "No noteworthy authentication findings detected.";
+  }
+
   // Technical Details
   document.getElementById("display-return-path").textContent =
     headers.return_path?.split("@")[1]?.replace(/[<>]/g, "") || "Not provided";
@@ -258,4 +295,62 @@ window.addEventListener("message", (event) => {
 
   document.getElementById("header-message-id").textContent =
     headers.message_id || "Not provided";
+
+  
+  // UPDATE: Create an expandable security finding
+  function addFinding(title, category, explanation, technicalDetails) {
+    const container = document.getElementById("findings-container");
+
+    // Finding card
+    const card = document.createElement("div");
+    card.classList.add("finding-card");
+
+    // Clickable finding title
+    const titleButton = document.createElement("button");
+    titleButton.classList.add("finding-title");
+    titleButton.textContent = title;
+    titleButton.setAttribute("aria-expanded", "false");
+
+    // Expandable content
+    const content = document.createElement("div");
+    content.classList.add("finding-content");
+    content.hidden = true;
+
+    const categoryLabel = document.createElement("p");
+    categoryLabel.textContent = category;
+
+    const explanationText = document.createElement("p");
+    explanationText.textContent = explanation;
+
+    // Technical details button
+    const technicalButton = document.createElement("button");
+    technicalButton.classList.add("finding-technical-button");
+    technicalButton.textContent = "View technical details";
+
+    // Technical details content
+    const technicalContent = document.createElement("p");
+    technicalContent.textContent = technicalDetails;
+    technicalContent.hidden = true;
+
+    // Expand and collapse the finding
+    titleButton.addEventListener("click", () => {
+      content.hidden = !content.hidden;
+      titleButton.setAttribute("aria-expanded", String(!content.hidden));
+    });
+
+    // Show and hide technical details
+    technicalButton.addEventListener("click", () => {
+      technicalContent.hidden = !technicalContent.hidden;
+      technicalButton.textContent = technicalContent.hidden
+        ? "View technical details"
+        : "Hide technical details";
+    });
+
+    // Assemble finding
+    content.append(categoryLabel, explanationText, technicalButton, technicalContent);
+    card.append(titleButton, content);
+    container.appendChild(card);
+  }
 });
+
+

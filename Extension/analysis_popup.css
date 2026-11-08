@@ -488,3 +488,47 @@ body {
   font-size: 12px;
   cursor: help;
 }
+
+/* Findings */
+.finding-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.finding-title {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.finding-content {
+  padding: 0 14px 14px;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.finding-content p {
+  margin: 8px 0;
+}
+
+.finding-technical-button {
+  margin-top: 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
