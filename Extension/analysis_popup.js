@@ -218,7 +218,13 @@ window.addEventListener("message", (event) => {
     if (status === "FAIL" || status === "MIXED") {
       const title = `${type.toUpperCase()} authentication ${status.toLowerCase()}`;
 
-      const explanation = getAuthDescription(type, status);
+      // const explanation = getAuthDescription(type, status);
+      const explanationKey = `${type}_${status.toLowerCase()}`;
+
+      const explanation = findingExplanations[explanationKey] || {
+        meaning: getAuthDescription(type, status),
+        whyItMatters: ""
+      };
 
       const technicalDetails = authResults
         .split(";")
@@ -323,8 +329,19 @@ window.addEventListener("message", (event) => {
     const categoryLabel = document.createElement("p");
     categoryLabel.textContent = category;
 
-    const explanationText = document.createElement("p");
-    explanationText.textContent = explanation;
+    //const explanationText = document.createElement("p");
+    //explanationText.textContent = explanation;
+    const meaningLabel = document.createElement("p");
+    meaningLabel.textContent = "What it means";
+
+    const meaningText = document.createElement("p");
+    meaningText.textContent = explanation.meaning;
+
+    const whyLabel = document.createElement("p");
+    whyLabel.textContent = "Why it matters";
+
+    const whyText = document.createElement("p");
+    whyText.textContent = explanation.whyItMatters;
 
     // Technical details button
     const technicalButton = document.createElement("button");
@@ -351,7 +368,16 @@ window.addEventListener("message", (event) => {
     });
 
     // Assemble finding
-    content.append(categoryLabel, explanationText, technicalButton, technicalContent);
+    // content.append(categoryLabel, explanationText, technicalButton, technicalContent);
+    content.append(
+      categoryLabel,
+      meaningLabel,
+      meaningText,
+      whyLabel,
+      whyText,
+      technicalButton,
+      technicalContent
+    );
     card.append(titleButton, content);
     container.appendChild(card);
   }
