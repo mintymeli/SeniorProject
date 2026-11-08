@@ -5,7 +5,8 @@ from threat_intel import analyze_tools, vt_result
 import base64
 import re 
 import hashlib
-
+import html
+from remediation import build_payload, get_remediation
 from body_classifier import BodyAnalyzer
 
 app = FastAPI()
@@ -48,6 +49,43 @@ def extract_urls(email_body):
 
     # Removes duplicate URLs
     return list(dict.fromkeys(urls))
+
+MAX_LINKS = 10
+SKIP_LINK_PATTERNS = (
+    r"^https?://(www\.)?w3\.org/",             # HTML boilerplate (DOCTYPE, xmlns)
+    r"\.(png|jpe?g|gif|svg|webp|ico)(\?|$)",   # images
+    r"/wf/open\b",                             # 1x1 tracking pixel
+)
+
+def is_useful_link(url):
+    return not any(re.search(p, url, re.IGNORECASE) for p in SKIP_LINK_PATTERNS)
+
+# Reads a Gmail body part (base64url) into text
+def decode_part(data):
+    padding = "=" * (-len(data) % 4)
+    return base64.urlsafe_b64decode(data + padding).decode("utf-8", errors="replace")
+
+# Finds links inside the HTML part, including buttons and image links
+def extract_html_links(payload):
+    links = []
+
+    def walk(part):
+        data = part.get("body", {}).get("data")
+        if part.get("mimeType") == "text/html" and data:
+            try:
+                page = decode_part(data)
+                for href in re.findall(r'href\s*=\s*["\']([^"\']+)["\']', page, flags=re.I):
+                    href = html.unescape(href).strip()
+                    if href.lower().startswith(("http://", "https://")):
+                        links.append(href)
+            except Exception as error:
+                print("Could not read HTML links:", error)
+
+        for child in part.get("parts", []):
+            walk(child)
+
+    walk(payload)
+    return links
 
 # Find images/attachments in the email and retrives hashes
 def extract_attachment_hashes(payload):
@@ -167,7 +205,11 @@ async def analyze_email(request: Request):
     else:
         decoded_body = "No email body found."
 
-    email_urls = extract_urls(decoded_body)
+    email_urls = [
+        u for u in dict.fromkeys(
+            extract_urls(decoded_body) + extract_html_links(email_json.get("payload", {}))
+        ) if is_useful_link(u)
+    ][:MAX_LINKS]
 
     body_findings = body_analyzer.analyze(decoded_body) if body_decoded_ok else []
 
@@ -178,11 +220,36 @@ async def analyze_email(request: Request):
     # Calculates hashes for images/attachments
     attachment_hashes = extract_attachment_hashes(email_json.get("payload", {}))
 
+    '''remediation_payload = build_payload(
+        body_findings, attachment_findings, sender_findings,
+        auth_results=email_auth_results, from_header=email_sender,
+        url_count=len(email_urls),
+        attachment_kinds=[a["mime_type"] for a in attachment_hashes],
+    )'''
+
     # Analyze email links and attachment hashes using threat intel tools
     threat_intel_results = analyze_tools(
         email_urls, 
         attachment_hashes
     )
+
+    remediation_payload = build_payload(
+        body_findings, attachment_findings, sender_findings,
+        auth_results=email_auth_results, from_header=email_sender,
+        reply_to=email_reply_to,
+        url_count=len(email_urls),
+        attachment_kinds=[a["mime_type"] for a in attachment_hashes],
+        intel=threat_intel_results,
+    )
+
+    remediation = get_remediation(remediation_payload)
+
+    print("🐟 REMEDIATION:")
+    print(f"[{remediation['risk_level']}] {remediation['verdict']} (from {remediation['source']})")
+    for action in remediation["actions"]:
+        print(" -", action)
+    print()
+
     
     # 4. Print headers to terminal
     print("\n" + "="*50)
@@ -416,6 +483,7 @@ async def analyze_email(request: Request):
         "attachment_findings": attachment_findings,
         "sender_findings": sender_findings,
         "links": email_urls,
+        "remediation": remediation,
         "threat_intel_results": threat_intel_results,
     }
 

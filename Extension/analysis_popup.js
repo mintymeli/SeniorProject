@@ -32,12 +32,60 @@ closeButton.addEventListener("click", () => {
   );
 });
 
+// Risk summary and "What to do" tab (result comes from remediation.py)
+const RISK_TEXT = {
+  none: ["No warning signs found", "Our checks didn't find anything suspicious in this email.", "Low risk"],
+  low: ["Looks mostly routine", "Only minor warning signs were found.", "Low risk"],
+  medium: ["Be careful with this email", "Some warning signs were found. Check before you click or reply.", "Medium risk"],
+  high: ["This email looks risky", "Several warning signs were found. Don't click links or open attachments.", "High risk"]
+};
+
+function showRemediation(remediation) {
+  if (!remediation || !RISK_TEXT[remediation.risk_level]) {
+    return;
+  }
+
+  const [title, description, status] = RISK_TEXT[remediation.risk_level];
+
+  document.getElementById("risk-title").textContent = title;
+  document.getElementById("risk-description").textContent = description;
+  document.getElementById("risk-status-text").textContent = status;
+  document.querySelector(".risk-status").dataset.level = remediation.risk_level;
+
+  const actions = remediation.actions || [];
+  const list = document.getElementById("action-list");
+  list.textContent = "";
+
+  actions.forEach((step) => {
+    const item = document.createElement("li");
+    item.textContent = step;
+    list.appendChild(item);
+  });
+
+  document.getElementById("action-why").textContent =
+    remediation.why || "";
+
+  document.getElementById("action-note").textContent =
+    remediation.source === "ai"
+      ? "Steps were worded by AI using only a coded summary of the checks. The email text was not shared."
+      : "";
+
+  document.getElementById("action-refs").textContent =
+    remediation.references?.length
+      ? "Based on: " + remediation.references.join("; ")
+      : "";
+
+  document.getElementById("actions-placeholder").hidden = true;
+  document.getElementById("actions-result").hidden = false;
+}
 
 /* Receive email headers from content.js */
 window.addEventListener("message", (event) => {
   if (event.data?.type !== "PHISHCATCHER_ANALYSIS_RESULT") {
     return;
   }
+
+  showRemediation(event.data.remediation);
 
   const headers = event.data.headers;
 

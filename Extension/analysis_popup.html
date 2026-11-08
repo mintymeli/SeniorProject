@@ -314,10 +314,17 @@
       <!-- What to do tab -->
       <section class="tab-panel" id="actions" hidden>
         <h3>Recommended next steps</h3>
-        <div class="placeholder">
+        <div class="placeholder" id="actions-placeholder">
           <span class="placeholder-icon">🛡️</span>
           <p><strong>Your next steps will appear here</strong></p>
           <p>We'll provide guidance based on the email analysis results.</p>
+        </div>
+
+        <div id="actions-result" hidden>
+          <p class="action-why" id="action-why"></p>
+          <ol class="action-list" id="action-list"></ol>
+          <p class="action-note" id="action-note"></p>
+          <p class="action-refs" id="action-refs"></p>
         </div>
       </section>
 

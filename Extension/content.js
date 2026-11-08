@@ -209,11 +209,13 @@ function getCurrentEmailId() {
           phishCatcherPanel.contentWindow.postMessage(
             {
               type: "PHISHCATCHER_ANALYSIS_RESULT",
-              headers: response.headers
+              headers: response.headers,
+              remediation: response.remediation
             },
             "*"
           );
         }
+        
         if (response && response.body_findings && typeof phishcatcherHighlight === "function") {
           const count = phishcatcherHighlight(response.body_findings);
           console.log("PhishCatcher highlighted", count, "phrase(s) in the email");

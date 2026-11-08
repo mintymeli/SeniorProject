@@ -23,3 +23,6 @@ URLHAUS_API_KEY = os.getenv("URLHAUS_API_KEY")
 
 # Retrives MalwareBazaar API Key
 MALWAREBAZAAR_API_KEY = os.getenv("MALWAREBAZAAR_API_KEY")
+
+# Retrieves the Gemini API key
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")

@@ -1,0 +1,9 @@
+text,label
+"Dear Customer, your PayPal account has been limited. Verify your identity within 24 hours or your account will be permanently suspended. Please confirm your password now.",phishing
+"URGENT: your bank account has been locked. Act now and enter your account number and social security number to restore access or it will be closed.",phishing
+"Final notice: your mailbox is full. Verify your password immediately at the link below or your email account will be disabled.",phishing
+"Hey everyone, we are hosting a board game night this Friday at the First-Gen Hub. Food and drinks will be provided. Hope to see you there!",legit
+"Thanks for your order! Your order #48213 has shipped and should arrive on Tuesday. You can track your package from your account page.",legit
+"New job match. A new role at Solace matches your preferences. View job. Update your preferences.",legit
+"Reminder for students: phishing emails often create a sense of urgency and ask for details such as passwords or bank account numbers. Never share these. Report suspicious messages to the Help Desk.",legit
+"Our monthly newsletter is here. Read about the campus events happening this week and how to apply for scholarships before the deadline next month.",legit

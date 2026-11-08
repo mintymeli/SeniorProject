@@ -599,3 +599,69 @@ body {
 .finding-technical-details {
   color: var(--ink);
 }
+
+/* Risk level colors */
+.risk-status .status-dot {
+  background: currentColor;
+}
+
+.risk-status[data-level="medium"] {
+  color: #946200;
+  background: #fff4d6;
+}
+
+.risk-status[data-level="high"] {
+  color: #c03939;
+  background: #fdecec;
+}
+
+/* What to do tab */
+.action-why {
+  margin: 0 0 14px;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.action-list {
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.action-list li {
+  position: relative;
+  margin-bottom: 10px;
+  padding: 13px 14px 13px 46px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 13px;
+  line-height: 1.55;
+  counter-increment: step;
+}
+
+.action-list li::before {
+  content: counter(step);
+  position: absolute;
+  top: 12px;
+  left: 13px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--blue-light);
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.action-note,
+.action-refs {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
