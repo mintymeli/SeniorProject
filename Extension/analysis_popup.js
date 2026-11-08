@@ -308,7 +308,11 @@ window.addEventListener("message", (event) => {
     // Clickable finding title
     const titleButton = document.createElement("button");
     titleButton.classList.add("finding-title");
-    titleButton.textContent = title;
+    //titleButton.textContent = title;
+    titleButton.innerHTML = `
+      <span>${title}</span>
+      <span class="finding-chevron"></span>
+    `;
     titleButton.setAttribute("aria-expanded", "false");
 
     // Expandable content
