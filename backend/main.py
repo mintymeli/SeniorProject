@@ -6,6 +6,7 @@ import base64
 import re 
 import hashlib
 import html
+import ipaddress
 from remediation import build_payload, get_remediation
 from body_classifier import BodyAnalyzer
 from header_analysis import analyze_headers
@@ -183,6 +184,11 @@ async def analyze_email(request: Request):
     ]
     # UPDATE:
     header_analysis = analyze_headers(header_map, email_received)
+    # Keeps only public IP addresses for external threat intelligence checks
+    public_header_ips = [
+        ip for ip in header_analysis["ips"]
+        if ipaddress.ip_address(ip).is_global
+    ]
     
     email_auth_results = [
         h["value"] for h in headers
@@ -234,7 +240,10 @@ async def analyze_email(request: Request):
     # Analyze email links and attachment hashes using threat intel tools
     threat_intel_results = analyze_tools(
         email_urls, 
-        attachment_hashes
+        attachment_hashes,
+        # UPDATE: include header indicators
+        header_domains=header_analysis["domains"],
+        header_ips=public_header_ips
     )
 
     remediation_payload = build_payload(

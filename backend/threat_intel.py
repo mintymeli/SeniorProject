@@ -11,6 +11,7 @@ from config import IPQS_API_KEY
 from config import URLSCAN_API_KEY
 from config import URLHAUS_API_KEY
 from config import MALWAREBAZAAR_API_KEY
+from config import ABUSEIPDB_API_KEY
 
 
 # ----- VirusTotal Analysis -----
@@ -707,7 +708,7 @@ def analyze_hash_malwarebazaar(file_hash):
 
 # ----- Email Threat Intel Analysis -----
 
-def analyze_tools(urls, attachment_hashes):
+def analyze_tools(urls, attachment_hashes, header_domains=None, header_ips=None):
 
     # Store results separately
     results = {
@@ -716,7 +717,11 @@ def analyze_tools(urls, attachment_hashes):
         "ipqs_results": [],
         "urlscan_results": [],
         "urlhaus_results": [],
-        "malwarebazaar_results": []
+        "malwarebazaar_results": [],
+        # For header analysis
+        "header_domain_results": [],
+        "header_ip_virustotal_results": [],
+        "header_ip_abuseipdb_results": []
     }
 
     # Store all checks that will run
@@ -790,6 +795,34 @@ def analyze_tools(urls, attachment_hashes):
                 file_hash,
                 "hash",
                 executor.submit(analyze_hash_malwarebazaar, file_hash)
+            ))
+                    # Checks unique header domains with VirusTotal
+        for domain in dict.fromkeys(header_domains or []):
+
+            tasks.append((
+                "header_domain_results",
+                domain,
+                "domain",
+                executor.submit(analyze_domain_virustotal, domain)
+            ))
+
+        # Checks unique public header IPs with VirusTotal and AbuseIPDB
+        for ip_address in dict.fromkeys(header_ips or []):
+
+            # VirusTotal IP lookup
+            tasks.append((
+                "header_ip_virustotal_results",
+                ip_address,
+                "ip",
+                executor.submit(analyze_ip_virustotal, ip_address)
+            ))
+
+            # AbuseIPDB IP lookup
+            tasks.append((
+                "header_ip_abuseipdb_results",
+                ip_address,
+                "ip",
+                executor.submit(analyze_ip_abuseipdb, ip_address)
             ))
 
         # Collects each results
@@ -868,3 +901,159 @@ def vt_result(result, indicator_type):
         f"Harmless: {result.get('harmless', 0)}"
     )
 
+# For HEADER ANALYSIS
+# ----- AbuseIPDB IP Reputation -----
+
+# Checks an IP address against AbuseIPDB
+def analyze_ip_abuseipdb(ip_address):
+
+    # Returns an error if the API key is unavailable
+    if not ABUSEIPDB_API_KEY:
+        return {
+            "ip": ip_address,
+            "status": "API key unavailable"
+        }
+
+    url = "https://api.abuseipdb.com/api/v2/check"
+
+    headers = {
+        "Key": ABUSEIPDB_API_KEY,
+        "Accept": "application/json"
+    }
+
+    params = {
+        "ipAddress": ip_address,
+        "maxAgeInDays": 90
+    }
+
+    try:
+        response = httpx.get(
+            url,
+            headers=headers,
+            params=params,
+            timeout=15
+        )
+
+        response.raise_for_status()
+
+        data = response.json().get("data", {})
+
+        return {
+            "ip": ip_address,
+            "status": "Report found",
+            "abuse_confidence_score": data.get("abuseConfidenceScore"),
+            "total_reports": data.get("totalReports"),
+            "country_code": data.get("countryCode"),
+            "isp": data.get("isp"),
+            "is_whitelisted": data.get("isWhitelisted")
+        }
+
+    except httpx.HTTPStatusError as error:
+        return {
+            "ip": ip_address,
+            "status": "Analysis unavailable",
+            "error": f"HTTP {error.response.status_code}"
+        }
+
+    except httpx.RequestError as error:
+        return {
+            "ip": ip_address,
+            "status": "Analysis unavailable",
+            "error": str(error)
+        }
+    
+# ----- VirusTotal IP Analysis -----
+
+# Looks up a VT report for an IP address
+def analyze_ip_virustotal(ip_address):
+
+    if not VIRUSTOTAL_API_KEY:
+        return {
+            "ip": ip_address,
+            "status": "Error",
+            "error": "VirusTotal API key is not configured."
+        }
+
+    endpoint = f"{VT_BASE_URL}/ip_addresses/{ip_address}"
+
+    try:
+        response = httpx.get(
+            endpoint,
+            headers=_get_headers(),
+            timeout=VT_TIMEOUT
+        )
+
+        if response.status_code != 200:
+            result = _handle_error(response, ip_address)
+            result["ip"] = ip_address
+            return result
+
+        attributes = response.json()["data"]["attributes"]
+
+        return {
+            "ip": ip_address,
+            "status": "Report found",
+            **_get_detection_counts(attributes)
+        }
+
+    except httpx.RequestError:
+        return {
+            "ip": ip_address,
+            "status": "Error",
+            "error": "Could not connect to VirusTotal."
+        }
+
+    except (ValueError, KeyError, TypeError):
+        return {
+            "ip": ip_address,
+            "status": "Error",
+            "error": "Could not read the VirusTotal response."
+        }
+
+# ----- VirusTotal Domain Analysis -----
+
+# Looks up a VT report for a domain
+def analyze_domain_virustotal(domain):
+
+    if not VIRUSTOTAL_API_KEY:
+        return {
+            "domain": domain,
+            "status": "Error",
+            "error": "VirusTotal API key is not configured."
+        }
+
+    endpoint = f"{VT_BASE_URL}/domains/{domain}"
+
+    try:
+        response = httpx.get(
+            endpoint,
+            headers=_get_headers(),
+            timeout=VT_TIMEOUT
+        )
+
+        if response.status_code != 200:
+            result = _handle_error(response, domain)
+            result["domain"] = domain
+            return result
+
+        attributes = response.json()["data"]["attributes"]
+
+        return {
+            "domain": domain,
+            "status": "Report found",
+            **_get_detection_counts(attributes)
+        }
+
+    except httpx.RequestError:
+        return {
+            "domain": domain,
+            "status": "Error",
+            "error": "Could not connect to VirusTotal."
+        }
+
+    except (ValueError, KeyError, TypeError):
+        return {
+            "domain": domain,
+            "status": "Error",
+            "error": "Could not read the VirusTotal response."
+        }

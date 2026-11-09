@@ -26,3 +26,6 @@ MALWAREBAZAAR_API_KEY = os.getenv("MALWAREBAZAAR_API_KEY")
 
 # Retrieves the Gemini API key
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# Retrieves AbuseIPDB API Key
+ABUSEIPDB_API_KEY = os.getenv("ABUSEIPDB_API_KEY")
