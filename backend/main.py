@@ -8,6 +8,7 @@ import hashlib
 import html
 from remediation import build_payload, get_remediation
 from body_classifier import BodyAnalyzer
+from header_analysis import analyze_headers
 
 app = FastAPI()
 
@@ -180,6 +181,9 @@ async def analyze_email(request: Request):
         h["value"] for h in headers
         if h.get("name", "").lower() == "received"
     ]
+    # UPDATE:
+    header_analysis = analyze_headers(header_map, email_received)
+    
     email_auth_results = [
         h["value"] for h in headers
         if h.get("name", "").lower() == "authentication-results"
@@ -478,6 +482,9 @@ async def analyze_email(request: Request):
             "authentication_results": email_auth_results,
             "message_id": email_message_id,
         },
+
+        # UPDATE: include header analysis info
+        "header_analysis": header_analysis,
 
         "body_findings": body_findings,
         "attachment_findings": attachment_findings,
