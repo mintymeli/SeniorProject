@@ -475,6 +475,67 @@ async def analyze_email(request: Request):
     else:
         print("No attachment hashes found for analysis.")
 
+    # ----- AbuseIPDB (URLscan) IP Analysis Results -----
+
+    print("\n🐟 ABUSEIPDB (URLSCAN) IP ANALYSIS:")
+
+    if threat_intel_results["urlscan_ip_abuseipdb_results"]:
+
+        for result in threat_intel_results["urlscan_ip_abuseipdb_results"]:
+
+            print(f"Source URL: {result.get('source_url') or 'Not found'}")
+            print(f"IP Address: {result.get('ip') or 'Not found'}")
+
+            # Checks whether AbuseIPDB found a report
+            if result.get("status") == "Report found":
+
+                print(f"Abuse Confidence Score: {result.get('abuse_confidence_score') if result.get('abuse_confidence_score') is not None else 'Not found'}%")
+                print(f"Total Reports: {result.get('total_reports') if result.get('total_reports') is not None else 'Not found'}")
+                print(f"Country: {result.get('country_code') or 'Not found'}")
+                print(f"ISP: {result.get('isp') or 'Not found'}")
+                print(f"Whitelisted: {result.get('is_whitelisted') if result.get('is_whitelisted') is not None else 'Not found'}")
+
+            # Handles missing API key or unavailable analysis
+            else:
+                print(f"Status: {result.get('status', 'Analysis unavailable')}")
+                print(f"Error: {result.get('error', 'No additional information available.')}")
+
+            print()
+
+    else:
+        print("No IP addresses found from URLscan for analysis.")
+        print()
+
+    # ----- VirusTotal (URLscan) IP Analysis Results -----
+
+    print("\n🐟 VIRUSTOTAL (URLSCAN) IP ANALYSIS:")
+
+    if threat_intel_results["urlscan_ip_vt_results"]:
+
+        for result in threat_intel_results["urlscan_ip_vt_results"]:
+
+            print(f"Source URL: {result.get('source_url') or 'Not found'}")
+            print(f"IP Address: {result.get('ip') or 'Not found'}")
+
+            # Displays VirusTotal detection results
+            if result.get("status") == "Report found":
+
+                print(f"Malicious: {result.get('malicious', 0)}")
+                print(f"Suspicious: {result.get('suspicious', 0)}")
+                print(f"Harmless: {result.get('harmless', 0)}")
+                print(f"Undetected: {result.get('undetected', 0)}")
+
+            # Handles missing reports or unavailable analysis
+            else:
+                print(f"Status: {result.get('status', 'Error')}")
+                print(f"Error: {result.get('error', 'No additional information available.')}")
+
+            print()
+
+    else:
+        print("No IP addresses found from URLscan for analysis.")
+        print()
+
     # 5. Send a quick success message back to the Chrome Extension
     return {
         "status": "Success",
