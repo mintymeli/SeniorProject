@@ -363,6 +363,22 @@ async def analyze_email(request: Request):
             print("-" * 30)
     else:
         print("No header domain results found.")
+
+    # Prints header public IP VirusTotal Results
+    print("\n🐟🐟 HEADER IP VIRUSTOTAL ANALYSIS:")
+
+    if threat_intel_results["header_ip_virustotal_results"]:
+        for result in threat_intel_results["header_ip_virustotal_results"]:
+            print(f"IP Address: {result.get('ip')}")
+            print(f"Status: {result.get('status')}")
+            print(f"Malicious: {result.get('malicious')}")
+            print(f"Suspicious: {result.get('suspicious')}")
+            print(f"Harmless: {result.get('harmless')}")
+            print(f"Undetected: {result.get('undetected')}")
+            print("-" * 30)
+    else:
+        print("No header IP VirusTotal results found.")
+        
     
     # Prints VT URL Results
     print("🐟 VIRUSTOTAL URL ANALYSIS:")
