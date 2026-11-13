@@ -339,6 +339,15 @@ async def analyze_email(request: Request):
     print(decoded_body)
     print("="*50 + "\n")
 
+    # Prints extracted header email addresses
+    print("\n🐟🐟 HEADER EMAIL EXTRACTION:")
+
+    if header_analysis["emails"]:
+        for email in header_analysis["emails"]:
+            print(f"Email: {email}")
+    else:
+        print("No email addresses found.")
+
     # ----- Prints Threat Intel Results -----
     
     # Prints VT URL Results
