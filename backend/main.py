@@ -378,10 +378,25 @@ async def analyze_email(request: Request):
             print("-" * 30)
     else:
         print("No header IP VirusTotal results found.")
-        
+
+    # Prints header public IP AbuseIPDB Results
+    print("\n🐟🐟 HEADER IP ABUSEIPDB ANALYSIS:")
+
+    if threat_intel_results["header_ip_abuseipdb_results"]:
+        for result in threat_intel_results["header_ip_abuseipdb_results"]:
+            print(f"IP Address: {result.get('ip')}")
+            print(f"Status: {result.get('status')}")
+            print(f"Abuse Confidence Score: {result.get('abuse_confidence_score')}")
+            print(f"Total Reports: {result.get('total_reports')}")
+            print(f"Country: {result.get('country_code')}")
+            print(f"ISP: {result.get('isp')}")
+            print(f"Whitelisted: {result.get('is_whitelisted')}")
+            print("-" * 30)
+    else:
+        print("No header IP AbuseIPDB results found.")
     
     # Prints VT URL Results
-    print("🐟 VIRUSTOTAL URL ANALYSIS:")
+    print("\n🐟 VIRUSTOTAL URL ANALYSIS:")
 
     if threat_intel_results["url_results"]:
         for result in threat_intel_results["url_results"]:
