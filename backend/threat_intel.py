@@ -2,6 +2,7 @@
 import base64
 import httpx
 import time
+import ipaddress
 from urllib.parse import quote
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
@@ -718,6 +719,8 @@ def analyze_tools(urls, attachment_hashes, header_domains=None, header_ips=None)
         "urlscan_results": [],
         "urlhaus_results": [],
         "malwarebazaar_results": [],
+        "urlscan_ip_abuseipdb_results": [],
+        "urlscan_ip_vt_results": [],
         # For header analysis
         "header_domain_results": [],
         "header_ip_virustotal_results": [],
@@ -841,6 +844,93 @@ def analyze_tools(urls, attachment_hashes, header_domains=None, header_ips=None)
 
             # Adds the result to the correct list
             results[result_type].append(result)
+
+    
+    # ----- Analyzes IP addresses returned by URLscan with AbuseIPDB and VT -----
+
+        # Lists to store the results from each tool
+        urlscan_ip_tasks = []
+        urlscan_ip_vt_tasks = []
+        seen_urlscan_ips = set()
+
+        # Goes through each URLscan result to find its IP address
+        for scan in results["urlscan_results"]:
+
+            ip_address = scan.get("ip")
+
+            # Skips missing IPs and duplicate IPs
+            if not ip_address or ip_address in seen_urlscan_ips:
+                continue
+
+            # Checks if IP is a valid IPv4 or IPv6
+            try:
+                parsed_ip = ipaddress.ip_address(ip_address)
+
+                if not parsed_ip.is_global:
+                    continue
+
+            # Skips anything that is not a valid IP address
+            except ValueError:
+                continue
+
+            # Saves the IP so we don't check it again
+            seen_urlscan_ips.add(ip_address)
+
+            # Submits the IP address to AbuseIPDB
+            urlscan_ip_tasks.append((
+                ip_address,
+                scan.get("url"),
+                executor.submit(analyze_ip_abuseipdb, ip_address)
+            ))
+
+            # Submits the same IP address to VirusTotal
+            urlscan_ip_vt_tasks.append((
+                ip_address,
+                scan.get("url"),
+                executor.submit(analyze_ip_virustotal, ip_address)
+            ))
+
+        # Goes through the AbuseIPDB results
+        for ip_address, source_url, future in urlscan_ip_tasks:
+
+            try:
+                # Gets the finished analysis results
+                result = future.result()
+
+            # Handles any problems that happen during the analysis
+            except Exception as e:
+                result = {
+                    "ip": ip_address,
+                    "status": "Analysis unavailable",
+                    "error": str(e)
+                }
+
+            # Saves the URL that the IP address came from
+            result["source_url"] = source_url
+
+            # Adds the results to the AbuseIPDB results list
+            results["urlscan_ip_abuseipdb_results"].append(result)
+
+        # Goes through the VirusTotal results
+        for ip_address, source_url, future in urlscan_ip_vt_tasks:
+
+            try:
+                # Gets the finished analysis results
+                result = future.result()
+
+            # Handles any problems that happen during the analysis
+            except Exception as e:
+                result = {
+                    "ip": ip_address,
+                    "status": "Error",
+                    "error": str(e)
+                }
+
+            # Saves the URL that the IP address came from
+            result["source_url"] = source_url
+
+            # Adds the results to the VirusTotal results list
+            results["urlscan_ip_vt_results"].append(result)
 
     return results
 
