@@ -297,9 +297,96 @@ window.addEventListener("message", (event) => {
     }
   });
 
-  if (authFindingsCount === 0) {
+  // Header email addresses
+  if (headerAnalysis?.emails?.length > 0) {
+    const emailList = headerAnalysis.emails.join("\n");
+
+    addHeaderSection(
+      "Extracted email addresses",
+      "Header Analysis · Email Addresses",
+      {
+        meaning: "These are the email addresses found in the message headers, including sender, recipient, and reply-to information.",
+        whyItMatters: "Reviewing these addresses can help you understand who is involved in the email and identify unexpected or unfamiliar addresses."
+      },
+      emailList
+    );
+  }
+
+  // Header domain reputation
+  const domainResults = threatIntelResults?.header_domain_results || [];
+
+  if (domainResults.length > 0) {
+    const domainDetails = domainResults.map(result =>
+      `Domain: ${result.domain}
+  Status: ${result.status}
+  Malicious: ${result.malicious}
+  Suspicious: ${result.suspicious}
+  Harmless: ${result.harmless}
+  Undetected: ${result.undetected}`
+    ).join("\n\n");
+
+    addHeaderSection(
+      "Domain reputation",
+      "Header Analysis · VirusTotal",
+      {
+        meaning: "These are the reputation results for domains extracted from the email headers, based on VirusTotal's available reports.",
+        whyItMatters: "Domain reputation can provide context about whether a domain has been associated with suspicious or malicious activity. A report with zero detections does not guarantee that a domain is safe."
+      },
+      domainDetails
+    );
+  }
+
+  // Header IP reputation
+  const ipVirusTotalResults =
+    threatIntelResults?.header_ip_virustotal_results || [];
+
+  const ipAbuseResults =
+    threatIntelResults?.header_ip_abuseipdb_results || [];
+
+  if (ipVirusTotalResults.length > 0 || ipAbuseResults.length > 0) {
+    const virusTotalDetails = ipVirusTotalResults.map(result =>
+      `VirusTotal
+  IP: ${result.ip}
+  Status: ${result.status}
+  Malicious: ${result.malicious}
+  Suspicious: ${result.suspicious}
+  Harmless: ${result.harmless}
+  Undetected: ${result.undetected}`
+    );
+
+    const abuseDetails = ipAbuseResults.map(result =>
+      `AbuseIPDB
+  IP: ${result.ip}
+  Status: ${result.status}
+  Abuse Confidence Score: ${result.abuse_confidence_score}%
+  Total Reports: ${result.total_reports}
+  Country: ${result.country_code}
+  ISP: ${result.isp}
+  Whitelisted: ${result.is_whitelisted}`
+    );
+
+    const ipDetails = [...virusTotalDetails, ...abuseDetails].join("\n\n");
+
+    addHeaderSection(
+      "IP reputation",
+      "Header Analysis · VirusTotal & AbuseIPDB",
+      {
+        meaning: "These results show available reputation information for public IP addresses extracted from the email's Received headers.",
+        whyItMatters: "IP reputation can provide context about the servers involved in delivering an email. A lack of reports or detections does not guarantee that an IP address is trustworthy."
+      },
+      ipDetails
+    );
+  }
+
+  // UPDATE: empty state when both authentication findings and header sections have nothing
+  const headerFindingsCount =
+  (headerAnalysis?.emails?.length > 0 ? 1 : 0) +
+  (domainResults.length > 0 ? 1 : 0) +
+  (ipVirusTotalResults.length > 0 || ipAbuseResults.length > 0 ? 1 : 0);
+
+  if (authFindingsCount === 0 && headerFindingsCount === 0) {
     findingsContainer.textContent =
-      "No noteworthy authentication findings detected.";
+      "No noteworthy header or authentication findings detected.";
   }
 
   // Technical Details
@@ -438,6 +525,16 @@ window.addEventListener("message", (event) => {
     card.append(titleButton, content);
     container.appendChild(card);
   } 
+
+  // Helper function
+  function addHeaderSection(title, category, explanation, technicalDetails) {
+    addFinding(
+      title,
+      category,
+      explanation,
+      technicalDetails
+    );
+  }
 });
 
 
