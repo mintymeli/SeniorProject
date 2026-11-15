@@ -552,6 +552,71 @@ body {
   line-height: 1.5;
 }
 
+/* Expandable reputation tool sections */
+.finding-result-group {
+  margin-top: 4px;
+}
+
+.finding-result-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 11px 4px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  border-radius: 7px;
+  transition: background 0.2s ease;
+}
+
+.finding-result-toggle:hover {
+  background: var(--blue-light);
+}
+
+.finding-result-chevron {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.finding-result-chevron::before {
+  content: "⌵";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.finding-result-toggle[aria-expanded="true"] .finding-result-chevron::before {
+  content: "⌃";
+  font-size: 16px;
+  font-weight: 230;
+}
+
+.finding-result-group-content {
+  padding: 4px 0 2px;
+}
+
+.finding-results-divider {
+  margin: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.finding-explanation-divider {
+  border-top: 1px solid var(--border);
+  margin: 8px 0 14px;
+}
+
 .finding-content p {
   margin: 8px 0;
 }

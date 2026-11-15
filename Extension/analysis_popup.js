@@ -299,7 +299,24 @@ window.addEventListener("message", (event) => {
 
   // Header email addresses
   if (headerAnalysis?.emails?.length > 0) {
-    const emailList = headerAnalysis.emails.join("\n");
+    const resultContent = document.createElement("div");
+    resultContent.classList.add("finding-results");
+
+    const resultHeading = document.createElement("p");
+    resultHeading.classList.add("finding-results-heading");
+    resultHeading.textContent =
+      `${headerAnalysis.emails.length} email addresses found`;
+
+    const emailList = document.createElement("ul");
+    emailList.classList.add("finding-results-list");
+
+    headerAnalysis.emails.forEach(email => {
+      const listItem = document.createElement("li");
+      listItem.textContent = email;
+      emailList.appendChild(listItem);
+    });
+
+    resultContent.append(resultHeading, emailList);
 
     addHeaderSection(
       "Extracted email addresses",
@@ -308,7 +325,8 @@ window.addEventListener("message", (event) => {
         meaning: "These are the email addresses found in the message headers, including sender, recipient, and reply-to information.",
         whyItMatters: "Reviewing these addresses can help you understand who is involved in the email and identify unexpected or unfamiliar addresses."
       },
-      emailList
+      headerAnalysis.emails.join("\n"),
+      resultContent
     );
   }
 
@@ -316,6 +334,48 @@ window.addEventListener("message", (event) => {
   const domainResults = threatIntelResults?.header_domain_results || [];
 
   if (domainResults.length > 0) {
+    const resultContent = document.createElement("div");
+    resultContent.classList.add("finding-results");
+
+    domainResults.forEach(result => {
+      const domainCard = document.createElement("div");
+      domainCard.classList.add("finding-result-item");
+
+      const domainName = document.createElement("strong");
+      domainName.textContent = result.domain;
+
+      const detectionGrid = document.createElement("div");
+      detectionGrid.classList.add("finding-detection-grid");
+
+      [
+        ["Malicious", result.malicious],
+        ["Suspicious", result.suspicious],
+        ["Harmless", result.harmless],
+        ["Undetected", result.undetected]
+      ].forEach(([label, count]) => {
+        const detection = document.createElement("div");
+        detection.classList.add("finding-detection");
+
+        const countText = document.createElement("strong");
+        countText.textContent = count ?? "N/A";
+
+        const labelText = document.createElement("span");
+        labelText.textContent = label;
+
+        detection.append(countText, labelText);
+        detectionGrid.appendChild(detection);
+      });
+
+      domainCard.append(domainName, detectionGrid);
+      resultContent.appendChild(domainCard);
+    });
+
+    const toolInfo = document.createElement("p");
+    toolInfo.classList.add("finding-tool-info");
+    toolInfo.textContent = "Tool used: VirusTotal";
+
+    resultContent.appendChild(toolInfo);
+
     const domainDetails = domainResults.map(result =>
       `Domain: ${result.domain}
   Status: ${result.status}
@@ -327,15 +387,17 @@ window.addEventListener("message", (event) => {
 
     addHeaderSection(
       "Domain reputation",
-      "Header Analysis · VirusTotal",
+      "Header Analysis · Domains",
       {
-        meaning: "These are the reputation results for domains extracted from the email headers, based on VirusTotal's available reports.",
-        whyItMatters: "Domain reputation can provide context about whether a domain has been associated with suspicious or malicious activity. A report with zero detections does not guarantee that a domain is safe."
+        meaning: "These results show the available reputation information for domains extracted from the email headers, based on VirusTotal reports.",
+        whyItMatters: "Domain reputation can provide context about whether a domain has been associated with suspicious or malicious activity. Zero detections do not guarantee that a domain is safe."
       },
-      domainDetails
+      domainDetails,
+      resultContent
     );
   }
 
+  // Header IP reputation
   // Header IP reputation
   const ipVirusTotalResults =
     threatIntelResults?.header_ip_virustotal_results || [];
@@ -344,18 +406,159 @@ window.addEventListener("message", (event) => {
     threatIntelResults?.header_ip_abuseipdb_results || [];
 
   if (ipVirusTotalResults.length > 0 || ipAbuseResults.length > 0) {
-    const virusTotalDetails = ipVirusTotalResults.map(result =>
-      `VirusTotal
+    const resultContent = document.createElement("div");
+    resultContent.classList.add("finding-results");
+
+    // Creates an expandable section for each reputation tool
+    function createExpandableResultGroup(title, results, createCard) {
+      const group = document.createElement("div");
+      group.classList.add("finding-result-group");
+
+      const toggleButton = document.createElement("button");
+      toggleButton.type = "button";
+      toggleButton.classList.add("finding-result-toggle");
+      toggleButton.setAttribute("aria-expanded", "false");
+
+      const heading = document.createElement("span");
+      heading.textContent = title;
+
+      const chevron = document.createElement("span");
+      chevron.classList.add("finding-result-chevron");
+
+      toggleButton.append(heading, chevron);
+
+      const groupContent = document.createElement("div");
+      groupContent.classList.add("finding-result-group-content");
+      groupContent.hidden = true;
+
+      results.forEach(result => {
+        groupContent.appendChild(createCard(result));
+      });
+
+      toggleButton.addEventListener("click", () => {
+        groupContent.hidden = !groupContent.hidden;
+        toggleButton.setAttribute(
+          "aria-expanded",
+          String(!groupContent.hidden)
+        );
+      });
+
+      group.append(toggleButton, groupContent);
+
+      return group;
+    }
+
+    // VirusTotal IP result cards
+    function createVirusTotalIPCard(result) {
+      const ipCard = document.createElement("div");
+      ipCard.classList.add("finding-result-item");
+
+      const ipName = document.createElement("strong");
+      ipName.textContent = result.ip;
+
+      const detectionGrid = document.createElement("div");
+      detectionGrid.classList.add("finding-detection-grid");
+
+      [
+        ["Malicious", result.malicious],
+        ["Suspicious", result.suspicious],
+        ["Harmless", result.harmless],
+        ["Undetected", result.undetected]
+      ].forEach(([label, count]) => {
+        const detection = document.createElement("div");
+        detection.classList.add("finding-detection");
+
+        const countText = document.createElement("strong");
+        countText.textContent = count ?? "N/A";
+
+        const labelText = document.createElement("span");
+        labelText.textContent = label;
+
+        detection.append(countText, labelText);
+        detectionGrid.appendChild(detection);
+      });
+
+      ipCard.append(ipName, detectionGrid);
+
+      return ipCard;
+    }
+
+    // AbuseIPDB IP result cards
+    function createAbuseIPDBCard(result) {
+      const ipCard = document.createElement("div");
+      ipCard.classList.add("finding-result-item");
+
+      const ipName = document.createElement("strong");
+      ipName.textContent = result.ip;
+
+      const abuseGrid = document.createElement("div");
+      abuseGrid.classList.add("finding-detection-grid");
+
+      [
+        ["Abuse confidence", `${result.abuse_confidence_score ?? "N/A"}%`],
+        ["Total reports", result.total_reports ?? "N/A"],
+        ["Country", result.country_code ?? "N/A"],
+        ["ISP", result.isp ?? "N/A"]
+      ].forEach(([label, value]) => {
+        const detail = document.createElement("div");
+        detail.classList.add("finding-detection");
+
+        const valueText = document.createElement("strong");
+        valueText.textContent = value;
+
+        const labelText = document.createElement("span");
+        labelText.textContent = label;
+
+        detail.append(valueText, labelText);
+        abuseGrid.appendChild(detail);
+      });
+
+      ipCard.append(ipName, abuseGrid);
+
+      return ipCard;
+    }
+
+    // VirusTotal section
+    if (ipVirusTotalResults.length > 0) {
+      resultContent.appendChild(
+        createExpandableResultGroup(
+          "VirusTotal Results",
+          ipVirusTotalResults,
+          createVirusTotalIPCard
+        )
+      );
+    }
+
+    // Divider between tools
+    if (ipVirusTotalResults.length > 0 && ipAbuseResults.length > 0) {
+      const divider = document.createElement("div");
+      divider.classList.add("finding-results-divider");
+      resultContent.appendChild(divider);
+    }
+
+    // AbuseIPDB section
+    if (ipAbuseResults.length > 0) {
+      resultContent.appendChild(
+        createExpandableResultGroup(
+          "AbuseIPDB Results",
+          ipAbuseResults,
+          createAbuseIPDBCard
+        )
+      );
+    }
+
+    const ipDetails = [
+      ...ipVirusTotalResults.map(result =>
+        `VirusTotal
   IP: ${result.ip}
   Status: ${result.status}
   Malicious: ${result.malicious}
   Suspicious: ${result.suspicious}
   Harmless: ${result.harmless}
   Undetected: ${result.undetected}`
-    );
-
-    const abuseDetails = ipAbuseResults.map(result =>
-      `AbuseIPDB
+      ),
+      ...ipAbuseResults.map(result =>
+        `AbuseIPDB
   IP: ${result.ip}
   Status: ${result.status}
   Abuse Confidence Score: ${result.abuse_confidence_score}%
@@ -363,18 +566,18 @@ window.addEventListener("message", (event) => {
   Country: ${result.country_code}
   ISP: ${result.isp}
   Whitelisted: ${result.is_whitelisted}`
-    );
-
-    const ipDetails = [...virusTotalDetails, ...abuseDetails].join("\n\n");
+      )
+    ].join("\n\n");
 
     addHeaderSection(
       "IP reputation",
-      "Header Analysis · VirusTotal & AbuseIPDB",
+      "Header Analysis · IP Addresses",
       {
         meaning: "These results show available reputation information for public IP addresses extracted from the email's Received headers.",
         whyItMatters: "IP reputation can provide context about the servers involved in delivering an email. A lack of reports or detections does not guarantee that an IP address is trustworthy."
       },
-      ipDetails
+      ipDetails,
+      resultContent
     );
   }
 
@@ -445,7 +648,7 @@ window.addEventListener("message", (event) => {
 
   
   // UPDATE: Create an expandable security finding
-  function addFinding(title, category, explanation, technicalDetails) {
+  function addFinding(title, category, explanation, technicalDetails, resultContent = null) {
     const container = document.getElementById("findings-container");
 
     // Finding card
@@ -476,6 +679,9 @@ window.addEventListener("message", (event) => {
     //explanationText.textContent = explanation;
     const meaningLabel = document.createElement("strong");
     meaningLabel.textContent = "What it means";
+
+    const explanationDivider = document.createElement("div");
+    explanationDivider.classList.add("finding-explanation-divider");
 
     const meaningText = document.createElement("p");
     meaningText.textContent = explanation.meaning;
@@ -515,6 +721,8 @@ window.addEventListener("message", (event) => {
     // content.append(categoryLabel, explanationText, technicalButton, technicalContent);
     content.append(
       categoryLabel,
+      ...(resultContent ? [resultContent] : []),
+      explanationDivider,
       meaningLabel,
       meaningText,
       whyLabel,
@@ -527,12 +735,13 @@ window.addEventListener("message", (event) => {
   } 
 
   // Helper function
-  function addHeaderSection(title, category, explanation, technicalDetails) {
+  function addHeaderSection(title, category, explanation, technicalDetails, resultContent) {
     addFinding(
       title,
       category,
       explanation,
-      technicalDetails
+      technicalDetails,
+      resultContent
     );
   }
 });
