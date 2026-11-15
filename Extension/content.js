@@ -210,7 +210,10 @@ function getCurrentEmailId() {
             {
               type: "PHISHCATCHER_ANALYSIS_RESULT",
               headers: response.headers,
-              remediation: response.remediation
+              remediation: response.remediation,
+              // send header analysis and threat intel results
+              header_analysis: response.header_analysis,
+              threat_intel_results: response.threat_intel_results
             },
             "*"
           );

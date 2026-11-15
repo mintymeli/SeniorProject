@@ -88,10 +88,16 @@ window.addEventListener("message", (event) => {
   showRemediation(event.data.remediation);
 
   const headers = event.data.headers;
+  // Include header analysis and threat intel results
+  const headerAnalysis = event.data.header_analysis;
+  const threatIntelResults = event.data.threat_intel_results;
 
   if (!headers) {
     return;
   }
+  // UPDATE: test if header and intel show in console
+  console.log("Header Analysis:", headerAnalysis);
+  console.log("Header Threat Intel Results:", threatIntelResults);
 
   // Email Information
   document.getElementById("display-from").textContent =
@@ -431,7 +437,7 @@ window.addEventListener("message", (event) => {
     );
     card.append(titleButton, content);
     container.appendChild(card);
-  }
+  } 
 });
 
 
