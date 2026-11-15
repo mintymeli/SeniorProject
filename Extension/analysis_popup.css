@@ -632,6 +632,15 @@ body {
   background: var(--blue-light);
 }
 
+/* Classify colors for Malicious and Suspicious*/
+.finding-detection-malicious {
+  background: #fce8e8;
+}
+
+.finding-detection-suspicious {
+  background: #fff3d6;
+}
+
 
 .finding-results-divider {
   margin: 8px 0;

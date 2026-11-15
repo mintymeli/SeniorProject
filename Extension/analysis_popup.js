@@ -377,6 +377,13 @@ window.addEventListener("message", (event) => {
         const detection = document.createElement("div");
         detection.classList.add("finding-detection");
 
+        // Classifying colors for malicious and suspicious
+        if (label === "Malicious" && count > 0) {
+          detection.classList.add("finding-detection-malicious");
+        } else if (label === "Suspicious" && count > 0) {
+          detection.classList.add("finding-detection-suspicious");
+        }
+
         // Include vendor fractions
         const countText = document.createElement("strong");
         countText.textContent =
