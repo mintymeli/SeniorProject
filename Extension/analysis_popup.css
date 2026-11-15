@@ -607,6 +607,32 @@ body {
   padding: 4px 0 2px;
 }
 
+/* For output results*/
+.finding-result-item {
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.finding-detection-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.finding-detection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--blue-light);
+}
+
+
 .finding-results-divider {
   margin: 8px 0;
   border-top: 1px solid var(--border);

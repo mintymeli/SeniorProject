@@ -331,8 +331,6 @@ window.addEventListener("message", (event) => {
   }
 
   // Header domain reputation
-  
-  // Header domain reputation
   const domainResults = threatIntelResults?.header_domain_results || [];
 
   if (domainResults.length > 0) {
@@ -379,13 +377,17 @@ window.addEventListener("message", (event) => {
         const detection = document.createElement("div");
         detection.classList.add("finding-detection");
 
+        // Include vendor fractions
         const countText = document.createElement("strong");
-        countText.textContent = count ?? "N/A";
+        countText.textContent =
+        count != null && result.total_vendors != null
+          ? `${count}/${result.total_vendors}`
+          : "N/A";
 
         const labelText = document.createElement("span");
         labelText.textContent = label;
 
-        detection.append(countText, labelText);
+        detection.append(labelText, countText);
         detectionGrid.appendChild(detection);
       });
 
@@ -496,12 +498,16 @@ window.addEventListener("message", (event) => {
         detection.classList.add("finding-detection");
 
         const countText = document.createElement("strong");
-        countText.textContent = count ?? "N/A";
+        // Inlcude vendor fractions
+        countText.textContent =
+        count != null && result.total_vendors != null
+          ? `${count}/${result.total_vendors}`
+          : "N/A";
 
         const labelText = document.createElement("span");
         labelText.textContent = label;
 
-        detection.append(countText, labelText);
+        detection.append(labelText, countText);
         detectionGrid.appendChild(detection);
       });
 
@@ -536,7 +542,7 @@ window.addEventListener("message", (event) => {
         const labelText = document.createElement("span");
         labelText.textContent = label;
 
-        detail.append(valueText, labelText);
+        detail.append(labelText, valueText);
         abuseGrid.appendChild(detail);
       });
 

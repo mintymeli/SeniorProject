@@ -28,17 +28,19 @@ def _get_headers():
         "x-apikey": VIRUSTOTAL_API_KEY
     }
 
-# Extracts the number of malicious, suspicious, harmless, and undetected results
+# UPDATE: Extracts the number of malicious, suspicious, harmless, undetected results and total vendor analyses
 def _get_detection_counts(attributes):
-    """Extract VirusTotal detection counts."""
+    """Extract VirusTotal detection counts and total vendor analyses."""
     stats = attributes.get("last_analysis_stats", {})
 
     return {
         "malicious": stats.get("malicious", 0),
         "suspicious": stats.get("suspicious", 0),
         "harmless": stats.get("harmless", 0),
-        "undetected": stats.get("undetected", 0)
+        "undetected": stats.get("undetected", 0),
+        "total_vendors": sum(stats.values())
     }
+
 
 # Handles errors returned by VT when a report cannot be retrieved
 def _handle_error(response, indicator):
