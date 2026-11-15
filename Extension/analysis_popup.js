@@ -331,11 +331,34 @@ window.addEventListener("message", (event) => {
   }
 
   // Header domain reputation
+  
+  // Header domain reputation
   const domainResults = threatIntelResults?.header_domain_results || [];
 
   if (domainResults.length > 0) {
     const resultContent = document.createElement("div");
     resultContent.classList.add("finding-results");
+
+    // Expandable VirusTotal results section
+    const domainGroup = document.createElement("div");
+    domainGroup.classList.add("finding-result-group");
+
+    const domainToggle = document.createElement("button");
+    domainToggle.type = "button";
+    domainToggle.classList.add("finding-result-toggle");
+    domainToggle.setAttribute("aria-expanded", "false");
+
+    const domainHeading = document.createElement("span");
+    domainHeading.textContent = "VirusTotal Results";
+
+    const domainChevron = document.createElement("span");
+    domainChevron.classList.add("finding-result-chevron");
+
+    domainToggle.append(domainHeading, domainChevron);
+
+    const domainGroupContent = document.createElement("div");
+    domainGroupContent.classList.add("finding-result-group-content");
+    domainGroupContent.hidden = true;
 
     domainResults.forEach(result => {
       const domainCard = document.createElement("div");
@@ -367,23 +390,28 @@ window.addEventListener("message", (event) => {
       });
 
       domainCard.append(domainName, detectionGrid);
-      resultContent.appendChild(domainCard);
+      domainGroupContent.appendChild(domainCard);
     });
 
-    const toolInfo = document.createElement("p");
-    toolInfo.classList.add("finding-tool-info");
-    toolInfo.textContent = "Tool used: VirusTotal";
+    domainToggle.addEventListener("click", () => {
+      domainGroupContent.hidden = !domainGroupContent.hidden;
+      domainToggle.setAttribute(
+        "aria-expanded",
+        String(!domainGroupContent.hidden)
+      );
+    });
 
-    resultContent.appendChild(toolInfo);
+    domainGroup.append(domainToggle, domainGroupContent);
+    resultContent.appendChild(domainGroup);
 
     const domainDetails = domainResults.map(result =>
       `Domain: ${result.domain}
-  Status: ${result.status}
-  Malicious: ${result.malicious}
-  Suspicious: ${result.suspicious}
-  Harmless: ${result.harmless}
-  Undetected: ${result.undetected}`
-    ).join("\n\n");
+      Status: ${result.status}
+      Malicious: ${result.malicious}
+      Suspicious: ${result.suspicious}
+      Harmless: ${result.harmless}
+      Undetected: ${result.undetected}`
+          ).join("\n\n");
 
     addHeaderSection(
       "Domain reputation",
@@ -397,7 +425,6 @@ window.addEventListener("message", (event) => {
     );
   }
 
-  // Header IP reputation
   // Header IP reputation
   const ipVirusTotalResults =
     threatIntelResults?.header_ip_virustotal_results || [];
