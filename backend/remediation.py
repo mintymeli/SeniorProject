@@ -28,6 +28,7 @@ FINDING_CODES = {
     "Generic Greeting": ("body", "greeting"),
     "Sensitive Info Request": ("body", "sensitive"),
     "Message Only in Attachment": ("attachment", "attach_only"),
+    "Macro-Enabled Document": ("attachment", "macro_doc"),
     "Many Recipients": ("sender", "many_recipients"),
     "Business Name on Free Email": ("sender", "freemail_business"),
 }
@@ -84,8 +85,13 @@ PLAYBOOK = {
         "text": "Don't open an attachment you weren't expecting, especially when the email has no message. Confirm with the sender using a phone number or address you already know.",
         "source": "cisa",
     },
+    "macro_doc": {
+        "triggers": {"macro_doc"},
+        "text": "A Word file in this email contains macros (small programs that run when you open it). Don't open it, and if Word asks you to \"Enable Content\" or \"Enable Editing\", say no.",
+        "source": "cisa",
+    },
     "if_acted": {
-        "triggers": {"sensitive", "urgency", "attach_only", "auth_fail", "link_bad", "link_risky", "link_new", "file_bad", "file_risky"},
+        "triggers": {"sensitive", "urgency", "attach_only", "macro_doc", "auth_fail", "link_bad", "link_risky", "link_new", "file_bad", "file_risky"},
         "text": "If you already {acted}: change the password for any account affected right now, turn on 2-Step Verification (a code sent to your phone when you sign in), and look for sign-ins you don't recognize. If you shared payment details, call your bank or card company.",
         "source": "nist800-61",
     },
@@ -322,7 +328,7 @@ def build_payload(body_findings, attachment_findings, sender_findings,
         severity = SEVERITY_CODE.get(finding.get("severity"), "L")
         if ftype in IGNORED_TYPES:
             continue
-        if ftype.startswith("Attachment Text: "):      # scam wording found inside a PDF
+        if ftype.startswith("Attachment Text: "):      # scam wording found inside a PDF or Word file
             inner = FINDING_CODES.get(ftype[len("Attachment Text: "):])
             if inner:
                 findings.append(["attachment", "pdf_" + inner[1], severity])
@@ -548,6 +554,7 @@ SIGN_TEXT = {                       # finding code -> plain words
     "greeting": "it uses a generic greeting",
     "sensitive": "it mentions sensitive information",
     "attach_only": "the message is only in an attachment",
+    "macro_doc": "a Word file contains macros that can run programs",
     "many_recipients": "it was sent to many people at once",
     "freemail_business": "a business name is used on a free email account",
     "in_spam": "Gmail already filed it as spam",
