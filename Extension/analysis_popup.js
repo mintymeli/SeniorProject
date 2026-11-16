@@ -382,10 +382,13 @@ window.addEventListener("message", (event) => {
       infoDialog.showModal();
     });*/
     
+    let virusTotalDialog = null;
     learnMore.addEventListener("click", (event) => {
       event.stopPropagation();
+      if (virusTotalDialog) return;
     
       const infoDialog = document.createElement("dialog");
+      virusTotalDialog = infoDialog;
       infoDialog.classList.add("finding-info-dialog");
     
       // Popup header
@@ -399,7 +402,12 @@ window.addEventListener("message", (event) => {
       closeButton.type = "button";
       closeButton.textContent = "×";
       closeButton.classList.add("finding-info-close");
-      closeButton.addEventListener("click", () => infoDialog.close());
+      // closeButton.addEventListener("click", () => infoDialog.close());
+      closeButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        infoDialog.remove();
+        virusTotalDialog = null;
+      });
     
       dialogHeader.append(title, closeButton);
     
@@ -434,13 +442,22 @@ window.addEventListener("message", (event) => {
         dialogHeader.setPointerCapture(event.pointerId);
       });
     
+      // UPDATE: limit popup window movement
       dialogHeader.addEventListener("pointermove", (event) => {
         if (!isDragging) return;
-    
-        infoDialog.style.left =
-          `${initialLeft + event.clientX - startX}px`;
-        infoDialog.style.top =
-          `${initialTop + event.clientY - startY}px`;
+      
+        const newLeft = initialLeft + event.clientX - startX;
+        const newTop = initialTop + event.clientY - startY;
+      
+        // Keep the popup within the visible extension window
+        const maxLeft = window.innerWidth - infoDialog.offsetWidth;
+        const maxTop = window.innerHeight - infoDialog.offsetHeight;
+      
+        const boundedLeft = Math.max(0, Math.min(newLeft, maxLeft));
+        const boundedTop = Math.max(0, Math.min(newTop, maxTop));
+      
+        infoDialog.style.left = `${boundedLeft}px`;
+        infoDialog.style.top = `${boundedTop}px`;
       });
     
       dialogHeader.addEventListener("pointerup", () => {
