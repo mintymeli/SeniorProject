@@ -877,3 +877,11 @@ body {
   font-size: 12px;
   line-height: 1.6;
 }
+
+.finding-results-heading {
+  margin: 0;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 650;
+}

@@ -305,7 +305,7 @@ window.addEventListener("message", (event) => {
     const resultHeading = document.createElement("p");
     resultHeading.classList.add("finding-results-heading");
     resultHeading.textContent =
-      `${headerAnalysis.emails.length} email addresses found`;
+      `${headerAnalysis.emails.length} email addresses found:`;
 
     const emailList = document.createElement("ul");
     emailList.classList.add("finding-results-list");
