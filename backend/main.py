@@ -7,7 +7,7 @@ import re
 import hashlib
 import html
 import ipaddress
-from remediation import build_payload, get_remediation
+from remediation import build_payload, flagged_links, get_remediation
 from body_classifier import BodyAnalyzer
 from header_analysis import analyze_headers
 
@@ -253,6 +253,7 @@ async def analyze_email(request: Request):
         url_count=len(email_urls),
         attachment_kinds=[a["mime_type"] for a in attachment_hashes],
         intel=threat_intel_results,
+        in_spam="SPAM" in email_json.get("labelIds", []),
     )
 
     remediation = get_remediation(remediation_payload)
@@ -615,6 +616,7 @@ async def analyze_email(request: Request):
         "sender_findings": sender_findings,
         "links": email_urls,
         "remediation": remediation,
+        "flagged_links": flagged_links(threat_intel_results, email_sender),
         "threat_intel_results": threat_intel_results,
     }
 
