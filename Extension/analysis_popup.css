@@ -770,6 +770,7 @@ body {
   margin-left: auto;
   margin-right: 8px;
   color: var(--blue);
+  font-weight: 600;
 }
 
 /* UPDATE: hover over Learn more*/

@@ -402,11 +402,16 @@ window.addEventListener("message", (event) => {
       closeButton.type = "button";
       closeButton.textContent = "×";
       closeButton.classList.add("finding-info-close");
+      closeButton.style.position = "relative";
+      closeButton.style.zIndex = "1";
       // closeButton.addEventListener("click", () => infoDialog.close());
       closeButton.addEventListener("click", (event) => {
         event.stopPropagation();
         infoDialog.remove();
         virusTotalDialog = null;
+      });
+      closeButton.addEventListener("pointerdown", (event) => {
+        event.stopPropagation();
       });
     
       dialogHeader.append(title, closeButton);
@@ -431,14 +436,17 @@ window.addEventListener("message", (event) => {
       let startX, startY, initialLeft, initialTop;
     
       dialogHeader.addEventListener("pointerdown", (event) => {
+        // Don't start dragging when the close button is clicked
+        if (event.target.closest(".finding-info-close")) return;
+      
         isDragging = true;
-    
+      
         const rect = infoDialog.getBoundingClientRect();
         startX = event.clientX;
         startY = event.clientY;
         initialLeft = rect.left;
         initialTop = rect.top;
-    
+      
         dialogHeader.setPointerCapture(event.pointerId);
       });
     
