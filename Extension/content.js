@@ -133,6 +133,63 @@ function getCurrentEmailId() {
 
 //getCurrentEmailId();
 
+// ----- Highlight the links the backend flagged -----
+function normalizeLink(url) {
+  return String(url || "").trim().replace(/[.,;)\]]+$/, "").replace(/\/+$/, "");
+}
+
+function clearLinkHighlights() {
+  document.querySelectorAll("a[data-phishcatcher-link]").forEach((a) => {
+    a.style.background = "";
+    a.style.outline = "";
+    a.style.borderRadius = "";
+    if (a.dataset.pcTitle) {
+      a.title = a.dataset.pcTitle;
+    } else {
+      a.removeAttribute("title");
+    }
+    delete a.dataset.pcTitle;
+    delete a.dataset.phishcatcherLink;
+  });
+}
+
+// Highlights the links the backend flagged. Red = high, amber = medium. Hover shows why.
+function phishcatcherHighlightLinks(flagged) {
+  clearLinkHighlights();
+  const root = document.querySelector("div.adn");
+  if (!root || !Array.isArray(flagged) || flagged.length === 0) {
+    return 0;
+  }
+
+  const byUrl = new Map(flagged.map((f) => [normalizeLink(f.url), f]));
+  let count = 0;
+
+  root.querySelectorAll("a[href]").forEach((a) => {
+    const candidates = [a.href, a.getAttribute("href")];
+    const redirect = a.getAttribute("data-saferedirecturl");
+    if (redirect) {
+      try {
+        candidates.push(new URL(redirect).searchParams.get("q"));
+      } catch (e) {}
+    }
+    const match = candidates.map(normalizeLink).map((u) => byUrl.get(u)).find(Boolean);
+    if (!match) {
+      return;
+    }
+
+    const high = match.severity === "high";
+    a.dataset.phishcatcherLink = match.severity;
+    a.dataset.pcTitle = a.getAttribute("title") || "";
+    a.style.background = high ? "#fecaca" : "#fde68a";
+    a.style.outline = "2px solid " + (high ? "#dc2626" : "#d97706");
+    a.style.borderRadius = "3px";
+    a.title = "PhishCatcher: " + (match.reasons || []).join("; ");
+    count++;
+  });
+
+  return count;
+}
+
 // Analyze Email Button Tester (it's a work in progress)
 
   // analyze email button 
@@ -222,6 +279,12 @@ function getCurrentEmailId() {
         if (response && response.body_findings && typeof phishcatcherHighlight === "function") {
           const count = phishcatcherHighlight(response.body_findings);
           console.log("PhishCatcher highlighted", count, "phrase(s) in the email");
+        }
+
+        // highlight links the threat intel checks flagged (red = high, amber = medium)
+        if (response && response.flagged_links) {
+          const linkCount = phishcatcherHighlightLinks(response.flagged_links);
+          console.log("PhishCatcher highlighted", linkCount, "link(s) in the email");
         }
       }
     );
