@@ -348,11 +348,44 @@ window.addEventListener("message", (event) => {
 
     const domainHeading = document.createElement("span");
     domainHeading.textContent = "VirusTotal Results";
+    /*UPDATE: Learn more area*/
+    const learnMore = document.createElement("span");
+    learnMore.textContent = "ⓘ Learn more";
+    learnMore.classList.add("finding-learn-more");
+    
+    // UPDATE: basic popup for VT info
+    learnMore.addEventListener("click", (event) => {
+      event.stopPropagation();
+    
+      const infoDialog = document.createElement("dialog");
+      infoDialog.classList.add("finding-info-dialog");
+    
+      const title = document.createElement("h3");
+      title.textContent = "About VirusTotal";
+    
+      // VT popup info
+      const description = document.createElement("p");
+      description.textContent =
+        "VirusTotal checks domains and IP addresses against multiple security vendors and threat intelligence sources to identify known malicious or suspicious activity.";
+    
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.textContent = "Close";
+      closeButton.addEventListener("click", () => infoDialog.close());
+    
+      infoDialog.append(title, description, closeButton);
+      document.body.appendChild(infoDialog);
+    
+      infoDialog.addEventListener("close", () => infoDialog.remove());
+    
+      infoDialog.showModal();
+    });
 
     const domainChevron = document.createElement("span");
     domainChevron.classList.add("finding-result-chevron");
 
-    domainToggle.append(domainHeading, domainChevron);
+    // domainToggle.append(domainHeading, domainChevron);
+    domainToggle.append(domainHeading, learnMore, domainChevron);
 
     const domainGroupContent = document.createElement("div");
     domainGroupContent.classList.add("finding-result-group-content");

@@ -765,3 +765,56 @@ body {
   font-size: 11px;
   line-height: 1.6;
 }
+
+.finding-learn-more {
+  margin-left: auto;
+  margin-right: 8px;
+  color: var(--blue);
+}
+
+/* UPDATE: hover over Learn more*/
+.finding-learn-more {
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.finding-learn-more:hover {
+  background: white;
+}
+
+.finding-info-dialog {
+  width: 85%;
+  max-width: 320px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.finding-info-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.finding-info-dialog h3 {
+  margin-top: 0;
+  font-size: 15px;
+}
+
+.finding-info-dialog p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.finding-info-dialog button {
+  margin-top: 12px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 7px;
+  background: var(--blue);
+  color: white;
+  cursor: pointer;
+}
