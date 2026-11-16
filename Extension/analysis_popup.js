@@ -333,6 +333,9 @@ window.addEventListener("message", (event) => {
   // Header domain reputation
   const domainResults = threatIntelResults?.header_domain_results || [];
 
+  let virusTotalDialog = null;
+  let abuseIPDBDialog = null;
+
   if (domainResults.length > 0) {
     const resultContent = document.createElement("div");
     resultContent.classList.add("finding-results");
@@ -352,6 +355,7 @@ window.addEventListener("message", (event) => {
     const learnMore = document.createElement("span");
     learnMore.textContent = "ⓘ Learn more";
     learnMore.classList.add("finding-learn-more");
+    learnMore.title = "Learn more about VirusTotal Results";
     
     // UPDATE: basic popup for VT info
     /*
@@ -382,8 +386,8 @@ window.addEventListener("message", (event) => {
       infoDialog.showModal();
     });*/
     
-    let virusTotalDialog = null;
-    learnMore.addEventListener("click", (event) => {
+    
+    /*learnMore.addEventListener("click", (event) => {
       event.stopPropagation();
       if (virusTotalDialog) return;
     
@@ -478,8 +482,16 @@ window.addEventListener("message", (event) => {
     
       // Show without blocking the background
       infoDialog.show();
-    });
+    });*/
+    learnMore.addEventListener("click", (event) => {
+      event.stopPropagation();
     
+      openInfoDialog(
+        "virustotal",
+        "About VirusTotal",
+        "VirusTotal checks domains and IP addresses against multiple security vendors and threat intelligence sources to identify known malicious or suspicious activity."
+      );
+    });
 
     const domainChevron = document.createElement("span");
     domainChevron.classList.add("finding-result-chevron");
@@ -579,7 +591,8 @@ window.addEventListener("message", (event) => {
     resultContent.classList.add("finding-results");
 
     // Creates an expandable section for each reputation tool
-    function createExpandableResultGroup(title, results, createCard) {
+    //function createExpandableResultGroup(title, results, createCard) {
+    function createExpandableResultGroup(title, results, createCard, onLearnMore = null) {
       const group = document.createElement("div");
       group.classList.add("finding-result-group");
 
@@ -591,10 +604,28 @@ window.addEventListener("message", (event) => {
       const heading = document.createElement("span");
       heading.textContent = title;
 
+      const learnMore = document.createElement("span");
+
+      if (onLearnMore) {
+        learnMore.textContent = "ⓘ Learn more";
+        learnMore.classList.add("finding-learn-more");
+        learnMore.title = `Learn more about ${title}`;
+
+        learnMore.addEventListener("click", (event) => {
+          event.stopPropagation();
+          onLearnMore();
+        });
+      }
+
       const chevron = document.createElement("span");
       chevron.classList.add("finding-result-chevron");
 
-      toggleButton.append(heading, chevron);
+      //toggleButton.append(heading, chevron);
+      toggleButton.append(
+        heading,
+        ...(onLearnMore ? [learnMore] : []),
+        chevron
+      );
 
       const groupContent = document.createElement("div");
       groupContent.classList.add("finding-result-group-content");
@@ -692,12 +723,26 @@ window.addEventListener("message", (event) => {
     }
 
     // VirusTotal section
-    if (ipVirusTotalResults.length > 0) {
+    /*if (ipVirusTotalResults.length > 0) {
       resultContent.appendChild(
         createExpandableResultGroup(
           "VirusTotal Results",
           ipVirusTotalResults,
           createVirusTotalIPCard
+        )
+      );
+    }*/
+    if (ipVirusTotalResults.length > 0) {
+      resultContent.appendChild(
+        createExpandableResultGroup(
+          "VirusTotal Results",
+          ipVirusTotalResults,
+          createVirusTotalIPCard,
+          () => openInfoDialog(
+            "virustotal",
+            "About VirusTotal",
+            "VirusTotal checks domains and IP addresses against multiple security vendors and threat intelligence sources to identify known malicious or suspicious activity."
+          )
         )
       );
     }
@@ -710,12 +755,26 @@ window.addEventListener("message", (event) => {
     }
 
     // AbuseIPDB section
-    if (ipAbuseResults.length > 0) {
+    /*if (ipAbuseResults.length > 0) {
       resultContent.appendChild(
         createExpandableResultGroup(
           "AbuseIPDB Results",
           ipAbuseResults,
           createAbuseIPDBCard
+        )
+      );
+    }*/
+    if (ipAbuseResults.length > 0) {
+      resultContent.appendChild(
+        createExpandableResultGroup(
+          "AbuseIPDB Results",
+          ipAbuseResults,
+          createAbuseIPDBCard,
+          () => openInfoDialog(
+            "abuseipdb",
+            "About AbuseIPDB",
+            "AbuseIPDB provides information about IP addresses reported for abusive activity. PhishCatcher checks the abuse confidence score, total reports, country, and ISP. A higher confidence score or report count can indicate a history of abuse, but does not prove that an IP address is currently malicious."
+          )
         )
       );
     }
@@ -763,6 +822,112 @@ window.addEventListener("message", (event) => {
   if (authFindingsCount === 0 && headerFindingsCount === 0) {
     findingsContainer.textContent =
       "No noteworthy header or authentication findings detected.";
+  }
+
+  // Creates a reusable information popup
+  function openInfoDialog(tool, titleText, explanationText) {
+    const isVirusTotal = tool === "virustotal";
+    const existingDialog = isVirusTotal
+      ? virusTotalDialog
+      : abuseIPDBDialog;
+
+    if (existingDialog) return;
+
+    const infoDialog = document.createElement("dialog");
+
+    if (isVirusTotal) {
+      virusTotalDialog = infoDialog;
+    } else {
+      abuseIPDBDialog = infoDialog;
+    }
+
+    infoDialog.classList.add("finding-info-dialog");
+
+    // Popup header
+    const dialogHeader = document.createElement("div");
+    dialogHeader.classList.add("finding-info-header");
+
+    const title = document.createElement("h3");
+    title.textContent = titleText;
+
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.textContent = "×";
+    closeButton.classList.add("finding-info-close");
+    closeButton.style.position = "relative";
+    closeButton.style.zIndex = "1";
+
+    closeButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      infoDialog.remove();
+
+      if (isVirusTotal) {
+        virusTotalDialog = null;
+      } else {
+        abuseIPDBDialog = null;
+      }
+    });
+
+    closeButton.addEventListener("pointerdown", (event) => {
+      event.stopPropagation();
+    });
+
+    dialogHeader.append(title, closeButton);
+
+    // Popup content
+    const description = document.createElement("div");
+    description.classList.add("finding-info-content");
+
+    const explanation = document.createElement("p");
+    explanation.textContent = explanationText;
+
+    description.appendChild(explanation);
+
+    infoDialog.append(dialogHeader, description);
+    document.body.appendChild(infoDialog);
+
+    // Allow the popup to move
+    let isDragging = false;
+    let startX, startY, initialLeft, initialTop;
+
+    dialogHeader.addEventListener("pointerdown", (event) => {
+      if (event.target.closest(".finding-info-close")) return;
+
+      isDragging = true;
+
+      const rect = infoDialog.getBoundingClientRect();
+      startX = event.clientX;
+      startY = event.clientY;
+      initialLeft = rect.left;
+      initialTop = rect.top;
+
+      dialogHeader.setPointerCapture(event.pointerId);
+    });
+
+    dialogHeader.addEventListener("pointermove", (event) => {
+      if (!isDragging) return;
+
+      const newLeft = initialLeft + event.clientX - startX;
+      const newTop = initialTop + event.clientY - startY;
+
+      const maxLeft = window.innerWidth - infoDialog.offsetWidth;
+      const maxTop = window.innerHeight - infoDialog.offsetHeight;
+
+      infoDialog.style.left =
+        `${Math.max(0, Math.min(newLeft, maxLeft))}px`;
+      infoDialog.style.top =
+        `${Math.max(0, Math.min(newTop, maxTop))}px`;
+    });
+
+    dialogHeader.addEventListener("pointerup", () => {
+      isDragging = false;
+    });
+
+    dialogHeader.addEventListener("pointercancel", () => {
+      isDragging = false;
+    });
+
+    infoDialog.show();
   }
 
   // Technical Details
