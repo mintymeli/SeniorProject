@@ -354,6 +354,7 @@ window.addEventListener("message", (event) => {
     learnMore.classList.add("finding-learn-more");
     
     // UPDATE: basic popup for VT info
+    /*
     learnMore.addEventListener("click", (event) => {
       event.stopPropagation();
     
@@ -379,7 +380,81 @@ window.addEventListener("message", (event) => {
       infoDialog.addEventListener("close", () => infoDialog.remove());
     
       infoDialog.showModal();
+    });*/
+    
+    learnMore.addEventListener("click", (event) => {
+      event.stopPropagation();
+    
+      const infoDialog = document.createElement("dialog");
+      infoDialog.classList.add("finding-info-dialog");
+    
+      // Popup header
+      const dialogHeader = document.createElement("div");
+      dialogHeader.classList.add("finding-info-header");
+    
+      const title = document.createElement("h3");
+      title.textContent = "About VirusTotal";
+    
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.textContent = "×";
+      closeButton.classList.add("finding-info-close");
+      closeButton.addEventListener("click", () => infoDialog.close());
+    
+      dialogHeader.append(title, closeButton);
+    
+      // Popup content
+      const description = document.createElement("div");
+      description.classList.add("finding-info-content");
+    
+      const explanation = document.createElement("p");
+      explanation.textContent =
+        "VirusTotal checks domains and IP addresses against multiple security vendors and threat intelligence sources to identify known malicious or suspicious activity.";
+    
+      description.appendChild(explanation);
+    
+      infoDialog.append(dialogHeader, description);
+      document.body.appendChild(infoDialog);
+    
+      infoDialog.addEventListener("close", () => infoDialog.remove());
+    
+      // Allow the popup to move
+      let isDragging = false;
+      let startX, startY, initialLeft, initialTop;
+    
+      dialogHeader.addEventListener("pointerdown", (event) => {
+        isDragging = true;
+    
+        const rect = infoDialog.getBoundingClientRect();
+        startX = event.clientX;
+        startY = event.clientY;
+        initialLeft = rect.left;
+        initialTop = rect.top;
+    
+        dialogHeader.setPointerCapture(event.pointerId);
+      });
+    
+      dialogHeader.addEventListener("pointermove", (event) => {
+        if (!isDragging) return;
+    
+        infoDialog.style.left =
+          `${initialLeft + event.clientX - startX}px`;
+        infoDialog.style.top =
+          `${initialTop + event.clientY - startY}px`;
+      });
+    
+      dialogHeader.addEventListener("pointerup", () => {
+        isDragging = false;
+      });
+    
+      dialogHeader.addEventListener("pointercancel", () => {
+        isDragging = false;
+      });
+    
+      // Show without blocking the background
+      infoDialog.show();
     });
+    
 
     const domainChevron = document.createElement("span");
     domainChevron.classList.add("finding-result-chevron");

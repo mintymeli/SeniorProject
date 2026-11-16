@@ -784,6 +784,7 @@ body {
   background: white;
 }
 
+/*
 .finding-info-dialog {
   width: 85%;
   max-width: 320px;
@@ -817,4 +818,61 @@ body {
   background: var(--blue);
   color: white;
   cursor: pointer;
+}*/
+
+
+.finding-info-dialog {
+  position: fixed;
+  left: 20px;
+  top: 20px;
+  width: 85%;
+  max-width: 320px;
+  max-height: 70vh;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.finding-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.finding-info-header:active {
+  cursor: grabbing;
+}
+
+.finding-info-header h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.finding-info-close {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.finding-info-content {
+  max-height: calc(70vh - 55px);
+  padding: 0 16px 16px;
+  overflow-y: auto;
+}
+
+.finding-info-content p {
+  font-size: 12px;
+  line-height: 1.6;
 }
