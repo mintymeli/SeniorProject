@@ -1038,8 +1038,14 @@ window.addEventListener("message", (event) => {
 
           example.results.forEach((result) => {
             const item = document.createElement("li");
-            item.textContent =
-              `${result.label}: ${result.count}/${example.total}`;
+            
+            const label = document.createElement("strong");
+            label.textContent = `${result.label}: `;
+            
+            const value = document.createElement("span");
+            value.textContent = `${result.count}/${example.total}`;
+            
+            item.append(label, value);
             exampleResults.appendChild(item);
           });
 

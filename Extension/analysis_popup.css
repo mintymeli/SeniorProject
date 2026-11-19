@@ -878,10 +878,146 @@ body {
   line-height: 1.6;
 }
 
+
+/* Information popup sections */
+.finding-info-section {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.finding-info-section:first-child {
+  padding-top: 4px;
+}
+
+.finding-info-section:last-child {
+  border-bottom: none;
+}
+
+.finding-info-section h4 {
+  margin: 0 0 9px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.finding-info-section p {
+  margin: 0 0 9px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* Definitions */
+.finding-info-definition {
+  margin: 9px 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.finding-info-definition strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* Example results */
+.finding-info-section ul,
+.finding-info-section ol {
+  padding-left: 20px;
+  margin: 8px 0 12px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.finding-info-section li {
+  padding-left: 3px;
+  margin-bottom: 4px;
+}
+
+/* Disclosure at the bottom */
+.finding-info-disclosure {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--blue-light);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.finding-info-disclosure strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.finding-info-disclosure p {
+  margin: 0;
+  font-size: 11px;
+}
+
+
 .finding-results-heading {
   margin: 0;
   color: var(--ink);
   font-family: inherit;
   font-size: 11.5px;
   font-weight: 650;
+}
+
+
+.finding-info-definition {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 8px 0;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+}
+
+.finding-info-definition strong {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.finding-info-definition span {
+  color: var(--ink);
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
+
+/* Example walkthrough */
+.finding-info-section ul {
+  list-style: none;
+  padding: 10px 12px;
+  margin: 10px 0 14px;
+  border-radius: 10px;
+  background: var(--blue-light);
+}
+
+.finding-info-section ul li {
+  padding: 5px 0;
+  margin: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.finding-info-section ul li:last-child {
+  border-bottom: none;
+}
+
+.finding-info-section ol {
+  padding-left: 22px;
+  margin: 10px 0;
+}
+
+.finding-info-section ol li {
+  padding-left: 4px;
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.finding-info-section ol li::marker {
+  color: var(--blue);
+  font-weight: 750;
 }

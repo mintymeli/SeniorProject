@@ -56,10 +56,11 @@ const toolInfo = {
             term: "Undetected",
             meaning: "The number of security tools that did not identify a threat. This does not necessarily mean the indicator is safe."
           }
-        ],
+        ],        
         paragraphsAfterDefinitions: [
-          "The numbers are displayed as a count out of the total number of vendors included in the analysis. For example, 5/92 means 5 vendors classified the indicator as malicious out of 92 vendors included in the analysis."
+        "A vendor fraction shows how many vendors gave a particular classification compared with the total number of vendors included in the analysis.",
         ]
+
       },
 
       {
