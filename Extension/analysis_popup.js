@@ -698,11 +698,19 @@ window.addEventListener("message", (event) => {
       const abuseGrid = document.createElement("div");
       abuseGrid.classList.add("finding-detection-grid");
 
+      // Update: add whitelisted to AbuseIPDB results
+      const whitelisted = result.whitelisted ?? result.is_whitelisted;
+
+      const whitelistStatus =
+        whitelisted === true ? "Yes" :
+        whitelisted === false ? "No" :
+        "N/A";
       [
         ["Abuse confidence", `${result.abuse_confidence_score ?? "N/A"}%`],
         ["Total reports", result.total_reports ?? "N/A"],
         ["Country", result.country_code ?? "N/A"],
-        ["ISP", result.isp ?? "N/A"]
+        ["ISP", result.isp ?? "N/A"],
+        ["Whitelisted", whitelistStatus]
       ].forEach(([label, value]) => {
         const detail = document.createElement("div");
         detail.classList.add("finding-detection");

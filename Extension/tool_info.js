@@ -101,5 +101,5 @@ const toolInfo = {
       heading: "Disclosure",
       text: "The total number of vendors includes all vendors whose results are part of the analysis, including those that did not provide a malicious, suspicious, harmless, or undetected classification. Because of this, the four category counts may not add up to the total."
     }
-  }
+  },
 };
