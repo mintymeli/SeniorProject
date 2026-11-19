@@ -825,7 +825,7 @@ window.addEventListener("message", (event) => {
   }
 
   // Creates a reusable information popup
-  function openInfoDialog(tool, titleText, explanationText) {
+  /*function openInfoDialog(tool, titleText, explanationText) {
     const isVirusTotal = tool === "virustotal";
     const existingDialog = isVirusTotal
       ? virusTotalDialog
@@ -928,7 +928,205 @@ window.addEventListener("message", (event) => {
     });
 
     infoDialog.show();
+  }*/
+
+  // Creates a reusable information popup
+  function openInfoDialog(tool, titleText, explanationText) {
+    const isVirusTotal = tool === "virustotal";
+    const existingDialog = isVirusTotal
+      ? virusTotalDialog
+      : abuseIPDBDialog;
+
+    if (existingDialog) return;
+
+    // Get the information stored in tool_info.js
+    const info = toolInfo[tool];
+
+    const infoDialog = document.createElement("dialog");
+
+    if (isVirusTotal) {
+      virusTotalDialog = infoDialog;
+    } else {
+      abuseIPDBDialog = infoDialog;
+    }
+
+    infoDialog.classList.add("finding-info-dialog");
+
+    // Popup header
+    const dialogHeader = document.createElement("div");
+    dialogHeader.classList.add("finding-info-header");
+
+    const title = document.createElement("h3");
+    title.textContent = info?.title || titleText;
+
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.textContent = "×";
+    closeButton.classList.add("finding-info-close");
+    closeButton.style.position = "relative";
+    closeButton.style.zIndex = "1";
+
+    closeButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      infoDialog.remove();
+
+      if (isVirusTotal) {
+        virusTotalDialog = null;
+      } else {
+        abuseIPDBDialog = null;
+      }
+    });
+
+    closeButton.addEventListener("pointerdown", (event) => {
+      event.stopPropagation();
+    });
+
+    dialogHeader.append(title, closeButton);
+
+    // Popup content
+    const description = document.createElement("div");
+    description.classList.add("finding-info-content");
+
+    // Display structured information from tool_info.js
+    if (info?.sections) {
+      info.sections.forEach((section) => {
+        const sectionContainer = document.createElement("section");
+        sectionContainer.classList.add("finding-info-section");
+
+        const heading = document.createElement("h4");
+        heading.textContent = section.heading;
+        sectionContainer.appendChild(heading);
+
+        // Regular paragraphs
+        section.paragraphs?.forEach((paragraphText) => {
+          const paragraph = document.createElement("p");
+          paragraph.textContent = paragraphText;
+          sectionContainer.appendChild(paragraph);
+        });
+
+        // Definitions
+        section.definitions?.forEach((definition) => {
+          const definitionContainer = document.createElement("div");
+          definitionContainer.classList.add("finding-info-definition");
+
+          const term = document.createElement("strong");
+          term.textContent = `${definition.term}: `;
+
+          const meaning = document.createElement("span");
+          meaning.textContent = definition.meaning;
+
+          definitionContainer.append(term, meaning);
+          sectionContainer.appendChild(definitionContainer);
+        });
+
+        // Paragraphs that appear after definitions
+        section.paragraphsAfterDefinitions?.forEach((paragraphText) => {
+          const paragraph = document.createElement("p");
+          paragraph.textContent = paragraphText;
+          sectionContainer.appendChild(paragraph);
+        });
+
+        // Example results
+        if (section.example) {
+          const example = section.example;
+
+          const exampleDescription = document.createElement("p");
+          exampleDescription.textContent = example.description;
+          sectionContainer.appendChild(exampleDescription);
+
+          const exampleResults = document.createElement("ul");
+
+          example.results.forEach((result) => {
+            const item = document.createElement("li");
+            item.textContent =
+              `${result.label}: ${result.count}/${example.total}`;
+            exampleResults.appendChild(item);
+          });
+
+          sectionContainer.appendChild(exampleResults);
+
+          const steps = document.createElement("ol");
+
+          example.steps.forEach((step) => {
+            const item = document.createElement("li");
+            item.textContent = step;
+            steps.appendChild(item);
+          });
+
+          sectionContainer.appendChild(steps);
+        }
+
+        description.appendChild(sectionContainer);
+      });
+
+      // Disclosure note at the bottom
+      if (info.disclosure) {
+        const disclosure = document.createElement("div");
+        disclosure.classList.add("finding-info-disclosure");
+
+        const disclosureHeading = document.createElement("strong");
+        disclosureHeading.textContent = info.disclosure.heading;
+
+        const disclosureText = document.createElement("p");
+        disclosureText.textContent = info.disclosure.text;
+
+        disclosure.append(disclosureHeading, disclosureText);
+        description.appendChild(disclosure);
+      }
+    } else {
+      // Fallback for tools without structured information yet
+      const explanation = document.createElement("p");
+      explanation.textContent = explanationText;
+      description.appendChild(explanation);
+    }
+
+    infoDialog.append(dialogHeader, description);
+    document.body.appendChild(infoDialog);
+
+    // Allow the popup to move
+    let isDragging = false;
+    let startX, startY, initialLeft, initialTop;
+
+    dialogHeader.addEventListener("pointerdown", (event) => {
+      if (event.target.closest(".finding-info-close")) return;
+
+      isDragging = true;
+
+      const rect = infoDialog.getBoundingClientRect();
+      startX = event.clientX;
+      startY = event.clientY;
+      initialLeft = rect.left;
+      initialTop = rect.top;
+
+      dialogHeader.setPointerCapture(event.pointerId);
+    });
+
+    dialogHeader.addEventListener("pointermove", (event) => {
+      if (!isDragging) return;
+
+      const newLeft = initialLeft + event.clientX - startX;
+      const newTop = initialTop + event.clientY - startY;
+
+      const maxLeft = window.innerWidth - infoDialog.offsetWidth;
+      const maxTop = window.innerHeight - infoDialog.offsetHeight;
+
+      infoDialog.style.left =
+        `${Math.max(0, Math.min(newLeft, maxLeft))}px`;
+      infoDialog.style.top =
+        `${Math.max(0, Math.min(newTop, maxTop))}px`;
+    });
+
+    dialogHeader.addEventListener("pointerup", () => {
+      isDragging = false;
+    });
+
+    dialogHeader.addEventListener("pointercancel", () => {
+      isDragging = false;
+    });
+
+    infoDialog.show();
   }
+
 
   // Technical Details
   document.getElementById("display-return-path").textContent =
