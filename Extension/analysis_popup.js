@@ -1,4 +1,3 @@
-
 const closeButton = document.getElementById("close-panel");
 const tabs = document.querySelectorAll(".tab");
 const panels = document.querySelectorAll(".tab-panel");
@@ -92,12 +91,54 @@ window.addEventListener("message", (event) => {
   const headerAnalysis = event.data.header_analysis;
   const threatIntelResults = event.data.threat_intel_results;
 
+  // URL threat intelligence results
+  const urlVirusTotalResults = threatIntelResults?.url_results || [];
+  const urlIPQSResults = threatIntelResults?.ipqs_results || [];
+  const urlhausResults = threatIntelResults?.urlhaus_results || [];
+
+  // Collect each unique URL found by the analysis tools
+  const analyzedUrls = [
+    ...new Set([
+      ...urlVirusTotalResults.map(result => result.url || result.indicator),
+      ...urlIPQSResults.map(result => result.url),
+      ...urlhausResults.map(result => result.url)
+    ].filter(Boolean))
+  ];
+
+  // Find a tool's result for a specific URL
+  function findUrlResult(results, url) {
+    return results.find(result =>
+      (result.url || result.indicator) === url
+    ) || null;
+  }
+
+  // Create one unique list of URLs across all three tools
+  const allUrls = [
+      ...new Set(
+          [
+              ...urlVirusTotalResults,
+              ...urlIPQSResults,
+              ...urlhausResults
+          ]
+              .map(result => result.url || result.indicator)
+              .filter(Boolean)
+      )
+  ];
+
+  // Find a tool's result for a specific URL
+  function getUrlResult(results, url) {
+      return results.find(
+          result => (result.url || result.indicator) === url
+      ) || null;
+  }
+
   if (!headers) {
     return;
   }
   // UPDATE: test if header and intel show in console
   console.log("Header Analysis:", headerAnalysis);
   console.log("Header Threat Intel Results:", threatIntelResults);
+  console.log("ALL THREAT INTEL RESULTS:", threatIntelResults);
 
   // Email Information
   document.getElementById("display-from").textContent =
@@ -827,7 +868,95 @@ window.addEventListener("message", (event) => {
   (domainResults.length > 0 ? 1 : 0) +
   (ipVirusTotalResults.length > 0 || ipAbuseResults.length > 0 ? 1 : 0);
 
-  if (authFindingsCount === 0 && headerFindingsCount === 0) {
+  // Tracking URL count
+  const urlFindingsCount = allUrls.length;
+
+  // connecting each URL to its three corresponding results and creating parent finding
+  if (allUrls.length > 0) {
+    const urlCardsContainer = document.createElement("div");
+    urlCardsContainer.className = "url-findings-container";
+
+    allUrls.forEach(url => {
+      const virusTotalResult = getUrlResult(urlVirusTotalResults, url);
+      const ipqsResult = getUrlResult(urlIPQSResults, url);
+      const urlhausResult = getUrlResult(urlhausResults, url);
+  
+      const urlCard = document.createElement("div");
+      urlCard.className = "url-finding-card";
+  
+      const urlTitle = document.createElement("p");
+      urlTitle.className = "url-finding-title";
+      urlTitle.textContent = url;
+  
+      urlCard.appendChild(urlTitle);
+      // Include:
+      const toolSections = [
+        { name: "VirusTotal", result: virusTotalResult },
+        { name: "IPQualityScore", result: ipqsResult },
+        { name: "URLhaus", result: urlhausResult }
+      ];
+      
+      // Create accordian
+      toolSections.forEach(tool => {
+        const toolSection = document.createElement("div");
+        toolSection.className = "url-tool-section";
+    
+        const toolToggle = document.createElement("button");
+        toolToggle.className = "url-tool-toggle";
+        toolToggle.type = "button";
+        toolToggle.setAttribute("aria-expanded", "false");
+    
+        const toolHeading = document.createElement("span");
+        toolHeading.textContent = tool.name;
+    
+        const chevron = document.createElement("span");
+        chevron.className = "url-tool-chevron";
+        chevron.textContent = "⌄";
+    
+        toolToggle.append(toolHeading, chevron);
+    
+        const toolContent = document.createElement("div");
+        toolContent.className = "url-tool-content";
+        toolContent.hidden = true;
+    
+        const toolStatus = document.createElement("p");
+        toolStatus.className = "url-tool-status";
+        toolStatus.textContent = tool.result?.status
+            || tool.result?.url_status
+            || "No result available";
+    
+        toolContent.appendChild(toolStatus);
+    
+        toolToggle.addEventListener("click", () => {
+            const isExpanded =
+                toolToggle.getAttribute("aria-expanded") === "true";
+    
+            toolToggle.setAttribute("aria-expanded", String(!isExpanded));
+            toolContent.hidden = isExpanded;
+            chevron.textContent = isExpanded ? "⌄" : "⌃";
+        });
+    
+        toolSection.append(toolToggle, toolContent);
+        urlCard.appendChild(toolSection);
+      });
+      urlCardsContainer.appendChild(urlCard);
+    });
+
+    addFinding(
+        "URL Analysis",
+        "URL Findings",
+        "Reputation results for URLs found in the email.",
+        "",
+        urlCardsContainer
+    );
+  }
+  
+  // display non empty-state message when URLs were found
+  if (
+    authFindingsCount === 0 &&
+    headerFindingsCount === 0 &&
+    urlFindingsCount === 0
+  ) {
     findingsContainer.textContent =
       "No noteworthy header or authentication findings detected.";
   }

@@ -1031,3 +1031,71 @@ body {
   font-size: 11px;
   line-height: 1.6;
 }
+
+/* URL Findings */
+.url-findings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.url-finding-card {
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+}
+
+.url-finding-title {
+    margin: 0 0 12px;
+    padding: 10px;
+    border-radius: 8px;
+    background: var(--blue-light);
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+}
+
+.url-tool-section {
+    border-top: 1px solid var(--border);
+}
+
+.url-tool-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 4px;
+    border: none;
+    background: transparent;
+    color: var(--ink);
+    text-align: left;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.url-tool-toggle:hover {
+    background: var(--blue-light);
+    border-radius: 7px;
+}
+
+.url-tool-chevron {
+    color: var(--muted);
+    font-size: 16px;
+}
+
+.url-tool-content {
+    padding: 2px 8px 12px;
+}
+
+.url-tool-status {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
