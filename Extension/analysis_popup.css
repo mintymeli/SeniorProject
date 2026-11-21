@@ -1115,3 +1115,34 @@ body {
   overflow-wrap: anywhere;
   line-height: 1.5;
 }
+
+.url-view-full-button {
+  display: block;
+  margin-top: 8px;
+  padding: 5px 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--blue);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.url-view-full-button:hover {
+  background: white;
+  border-color: var(--border);
+}
+
+.url-full-text {
+  margin: 8px 0 0;
+  padding: 8px;
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}

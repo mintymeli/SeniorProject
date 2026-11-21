@@ -908,7 +908,27 @@ window.addEventListener("message", (event) => {
               : fullPath || "/";
 
       // Add domain and path to URL title
-      urlTitle.append(urlDomain, urlPath);
+      //urlTitle.append(urlDomain, urlPath);
+      // View full URL button
+      const viewUrlButton = document.createElement("button");
+      viewUrlButton.className = "url-view-full-button";
+      viewUrlButton.type = "button";
+      viewUrlButton.textContent = "View full URL";
+
+      const fullUrlText = document.createElement("p");
+      fullUrlText.className = "url-full-text";
+      fullUrlText.textContent = url;
+      fullUrlText.hidden = true;
+
+      viewUrlButton.addEventListener("click", () => {
+          fullUrlText.hidden = !fullUrlText.hidden;
+
+          viewUrlButton.textContent = fullUrlText.hidden
+              ? "View full URL"
+              : "Hide full URL";
+      });
+
+      urlTitle.append(urlDomain, urlPath, viewUrlButton, fullUrlText);
   
       urlCard.appendChild(urlTitle);
       // Include:
