@@ -1099,3 +1099,19 @@ body {
     font-size: 12px;
     line-height: 1.5;
 }
+
+.url-finding-domain {
+  display: block;
+  font-size: 13px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.url-finding-path {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}

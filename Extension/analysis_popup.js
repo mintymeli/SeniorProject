@@ -886,7 +886,29 @@ window.addEventListener("message", (event) => {
   
       const urlTitle = document.createElement("p");
       urlTitle.className = "url-finding-title";
-      urlTitle.textContent = url;
+      // urlTitle.textContent = url;
+      // Show domain separately, shorten URL path, truncate long URLs
+      const parsedUrl = new URL(url);
+
+      // Display domain
+      const urlDomain = document.createElement("strong");
+      urlDomain.className = "url-finding-domain";
+      urlDomain.textContent = parsedUrl.hostname;
+
+      // Display path
+      const urlPath = document.createElement("p");
+      urlPath.className = "url-finding-path";
+
+      const fullPath = parsedUrl.pathname;
+      const maxPathLength = 45;
+
+      urlPath.textContent =
+          fullPath.length > maxPathLength
+              ? `${fullPath.substring(0, maxPathLength)}...`
+              : fullPath || "/";
+
+      // Add domain and path to URL title
+      urlTitle.append(urlDomain, urlPath);
   
       urlCard.appendChild(urlTitle);
       // Include:
@@ -921,13 +943,163 @@ window.addEventListener("message", (event) => {
     
         const toolStatus = document.createElement("p");
         toolStatus.className = "url-tool-status";
-        toolStatus.textContent = tool.result?.status
+        /*toolStatus.textContent = tool.result?.status
             || tool.result?.url_status
             || "No result available";
     
-        toolContent.appendChild(toolStatus);
+        toolContent.appendChild(toolStatus);*/
+        // UPDATE: VT results for URLs
+        if (tool.name === "VirusTotal") {
+          if (tool.result?.status === "Report found") {
+              const metrics = [
+                  ["Malicious", tool.result.malicious],
+                  ["Suspicious", tool.result.suspicious],
+                  ["Harmless", tool.result.harmless],
+                  ["Undetected", tool.result.undetected]
+              ];
+      
+              const total = tool.result.total_vendors ?? "N/A";
+      
+              const metricsContainer = document.createElement("div");
+              metricsContainer.className = "finding-detection-grid";
+      
+              metrics.forEach(([label, value]) => {
+                  const metric = document.createElement("div");
+                  metric.className = "finding-detection";
+      
+                  const metricLabel = document.createElement("span");
+                  metricLabel.textContent = label;
+      
+                  const metricValue = document.createElement("strong");
+                  metricValue.textContent = `${value ?? "N/A"} / ${total}`;
+      
+                  metric.append(metricLabel, metricValue);
+                  metricsContainer.appendChild(metric);
+              });
+      
+              toolContent.appendChild(metricsContainer);
+          } else {
+              toolStatus.textContent =
+                  tool.result?.error ||
+                  (tool.result?.status === "No report found"
+                      ? "No existing VirusTotal report was found for this URL."
+                      : `VirusTotal result unavailable: ${tool.result?.status || "No result available"}.`);
+      
+              toolContent.appendChild(toolStatus);
+          }
+        }
+        // IPQS, displays only fields with actual values
+        else if (tool.name === "IPQualityScore") {
+          if (tool.result?.status === "Report found") {
+              const fields = [
+                  ["Safe", tool.result.safe],
+                  ["Suspicious", tool.result.suspicious],
+                  ["Domain", tool.result.domain],
+                  ["Malware", tool.result.malware],
+                  ["Phishing", tool.result.phishing],
+                  ["Risk Score", tool.result.risk_score],
+                  ["Domain Age", tool.result.domain_age]
+              ];
+
+              const fieldsContainer = document.createElement("div");
+              fieldsContainer.className = "finding-detection-grid";
+
+              fields.forEach(([label, value]) => {
+                  if (
+                      value === undefined ||
+                      value === null ||
+                      value === "Not found"
+                  ) {
+                      return;
+                  }
+
+                  const field = document.createElement("div");
+                  field.className = "finding-detection";
+
+                  const fieldLabel = document.createElement("span");
+                  fieldLabel.textContent = label;
+
+                  const fieldValue = document.createElement("strong");
+
+                  if (typeof value === "boolean") {
+                      fieldValue.textContent = value ? "Yes" : "No";
+                  } else {
+                      fieldValue.textContent = value;
+                  }
+
+                  field.append(fieldLabel, fieldValue);
+                  fieldsContainer.appendChild(field);
+              });
+
+              toolContent.appendChild(fieldsContainer);
+          } else {
+              toolStatus.textContent =
+                  tool.result?.error ||
+                  `IPQualityScore result unavailable: ${tool.result?.status || "No result available"}.`;
+
+              toolContent.appendChild(toolStatus);
+        }
+      }
+      // URLhaus results for URLs
+      else if (tool.name === "URLhaus") {
+          if (tool.result?.url_status === "Not found") {
+              toolStatus.textContent =
+                  "This URL was not found in the URLhaus database.";
+
+              toolContent.appendChild(toolStatus);
+          } else if (tool.result?.url_status === "Error") {
+              toolStatus.textContent =
+                  tool.result?.error ||
+                  "URLhaus results are currently unavailable.";
+
+              toolContent.appendChild(toolStatus);
+          } else if (tool.result?.url_status) {
+              const fields = [
+                  ["URL Status", tool.result.url_status],
+                  ["Host", tool.result.host],
+                  ["Date Added", tool.result.date_added],
+                  ["Threat Type", tool.result.threat],
+                  ["URLhaus Blocklist", tool.result.urlhaus_blocklist],
+                  ["Spamhaus DBL", tool.result.spamhaus_dbl],
+                  ["SURBL", tool.result.surbl]
+              ];
+
+              const fieldsContainer = document.createElement("div");
+              fieldsContainer.className = "finding-detection-grid";
+
+              fields.forEach(([label, value]) => {
+                  if (
+                      value === undefined ||
+                      value === null ||
+                      value === "Not found" ||
+                      value === "N/A"
+                  ) {
+                      return;
+                  }
+
+                  const field = document.createElement("div");
+                  field.className = "finding-detection";
+
+                  const fieldLabel = document.createElement("span");
+                  fieldLabel.textContent = label;
+
+                  const fieldValue = document.createElement("strong");
+                  fieldValue.textContent = value;
+
+                  field.append(fieldLabel, fieldValue);
+                  fieldsContainer.appendChild(field);
+              });
+
+              toolContent.appendChild(fieldsContainer);
+          } else {
+              toolStatus.textContent =
+                  "No URLhaus result is available.";
+
+              toolContent.appendChild(toolStatus);
+          }
+      }
     
-        toolToggle.addEventListener("click", () => {
+      toolToggle.addEventListener("click", () => {
             const isExpanded =
                 toolToggle.getAttribute("aria-expanded") === "true";
     
