@@ -82,7 +82,8 @@ const toolInfo = {
             "Look at Harmless: 60 vendors classified the domain as harmless.",
             "Look at Undetected: 20 vendors did not identify a threat.",
             "Consider all the results together. The 5 malicious detections are worth investigating, even though many other vendors did not flag the domain."
-          ]
+          ],
+          note: "This example uses a domain, but the same explanation applies to IP address results. The values may differ depending on the indicator being analyzed."
         }
       },
 
@@ -102,4 +103,86 @@ const toolInfo = {
       text: "The total number of vendors includes all vendors whose results are part of the analysis, including those that did not provide a malicious, suspicious, harmless, or undetected classification. Because of this, the four category counts may not add up to the total."
     }
   },
+
+  // AbuseIPDB info
+  abuseipdb: {
+    title: "About AbuseIPDB",
+  
+    sections: [
+      {
+        heading: "What is AbuseIPDB?",
+        paragraphs: [
+          "AbuseIPDB is an online service that collects and shares reports about IP addresses associated with abusive activity, such as spam, hacking attempts, and other suspicious behavior.",
+          "It allows users and security professionals to check whether an IP address has previously been reported for potentially harmful activity."
+        ]
+      },
+      {
+        heading: "How does PhishCatcher use it?",
+        paragraphs: [
+          "When you analyze an email, PhishCatcher extracts IP addresses from its email headers.",
+          "It filters out non-public IP addresses and checks the remaining public IP addresses against AbuseIPDB's existing records.",
+          "PhishCatcher retrieves information such as the Abuse Confidence Score, Total Reports, country, ISP, and whitelist status. It looks up existing information; it does not submit abuse reports."
+        ]
+      },
+      {
+        heading: "How do I read the results?",
+        paragraphs: [
+          "Each result provides information about the IP address and its history in AbuseIPDB."
+        ],
+        definitions: [
+          {
+            term: "Abuse Confidence Score",
+            meaning: "A score from 0 to 100 based on reports submitted about an IP address. A higher score indicates greater concern about reported abusive activity, not the probability that the IP address is malicious."
+          },
+          {
+            term: "Total Reports",
+            meaning: "The number of abuse reports submitted about this IP address and recorded by AbuseIPDB."
+          },
+          {
+            term: "Country",
+            meaning: "The country associated with the IP address. This does not necessarily tell us where the person who sent the email is located."
+          },
+          {
+            term: "ISP (Internet Service Provider)",
+            meaning: "The organization that provides or manages the internet connection associated with the IP address. For example, this could be an internet provider, university, or hosting company."
+          },
+          {
+            term: "Whitelisted",
+            meaning: "Indicates whether AbuseIPDB has marked the IP address as trusted. Yes means it is on the whitelist, while No means it is not. A whitelisted IP address is not automatically guaranteed to be safe."
+          }
+        ]
+      },
+      {
+        heading: "Let's look at an example",
+        example: {
+          description: "Imagine PhishCatcher returns the following results for the IP address 192.0.2.10:",
+          total: 0,
+          results: [
+            { label: "Abuse Confidence Score", count: 75 },
+            { label: "Total Reports", count: 12 },
+            { label: "Country", count: "US" },
+            { label: "ISP", count: "Example University" },
+            { label: "Whitelisted", count: "No" }
+          ],
+          steps: [
+            "Start with the Abuse Confidence Score: A score of 75 indicates considerable concern about reported abusive activity associated with this IP address.",
+            "Look at Total Reports: The IP address has 12 abuse reports recorded by AbuseIPDB.",
+            "Check the Country: The IP address is associated with the United States.",
+            "Look at the ISP: Example University is listed as the organization associated with the IP address.",
+            "Check Whitelisted: The result is No, meaning AbuseIPDB has not marked this IP address as trusted.",
+            "Consider all the results together: The score and report history suggest the IP address deserves further investigation, but they do not prove that the email is malicious."
+          ]
+        }
+      },
+      {
+        heading: "Things to keep in mind",
+        paragraphs: [
+          "AbuseIPDB relies on reports submitted by users. Reports may vary in accuracy and can become outdated.",
+          "An IP address may be shared by multiple websites, services, organizations, or users. A report does not necessarily mean the current owner or sender is responsible for the activity.",
+          "A score of zero or no reports does not guarantee that an IP address is safe.",
+          "AbuseIPDB results are one source of threat intelligence and should be considered alongside the other findings in PhishCatcher."
+        ]
+      }
+    ]
+  }  
 };

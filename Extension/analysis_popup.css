@@ -1021,3 +1021,13 @@ body {
   color: var(--blue);
   font-weight: 750;
 }
+
+.finding-info-note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: var(--blue-light);
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.6;
+}

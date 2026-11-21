@@ -706,7 +706,7 @@ window.addEventListener("message", (event) => {
         whitelisted === false ? "No" :
         "N/A";
       [
-        ["Abuse confidence", `${result.abuse_confidence_score ?? "N/A"}%`],
+        ["Abuse confidence", `${result.abuse_confidence_score ?? "N/A"}`],
         ["Total reports", result.total_reports ?? "N/A"],
         ["Country", result.country_code ?? "N/A"],
         ["ISP", result.isp ?? "N/A"],
@@ -1051,7 +1051,10 @@ window.addEventListener("message", (event) => {
             label.textContent = `${result.label}: `;
             
             const value = document.createElement("span");
-            value.textContent = `${result.count}/${example.total}`;
+            value.textContent =
+            example.total > 0
+              ? `${result.count}/${example.total}`
+              : result.count;
             
             item.append(label, value);
             exampleResults.appendChild(item);
@@ -1067,7 +1070,23 @@ window.addEventListener("message", (event) => {
             steps.appendChild(item);
           });
 
+          // Inlcude ex note in popup
           sectionContainer.appendChild(steps);
+
+          // Include example note after the numbered steps
+          if (example.note) {
+            const note = document.createElement("p");
+            note.classList.add("finding-info-note");
+
+            const noteLabel = document.createElement("strong");
+            noteLabel.textContent = "Note: ";
+
+            const noteText = document.createElement("span");
+            noteText.textContent = example.note;
+
+            note.append(noteLabel, noteText);
+            sectionContainer.appendChild(note);
+          }
         }
 
         description.appendChild(sectionContainer);
