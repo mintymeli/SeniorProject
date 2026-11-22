@@ -176,11 +176,13 @@ const toolInfo = {
                       { label: "Domain Age", count: "18 years ago" }
                   ],
                   steps: [
-                      "The link is marked as safe and is not flagged as suspicious.",
-                      "IPQS did not identify signs of malware or phishing.",
-                      "The risk score is 12, which is below IPQS's high-risk threshold of 85.",
-                      "The domain has been registered for 18 years. This gives us additional context, but does not prove that the website is safe."
-                  ],
+                    "Start with Safe: the result is Yes, meaning IPQS did not classify the link as unsafe.",
+                    "Look at Suspicious: the result is No, meaning IPQS did not flag the link as suspicious.",
+                    "Check Malware and Phishing: both results are No, meaning IPQS did not identify signs of malware or phishing.",
+                    "Look at Risk Score: the score is 12, which is below IPQS's high-risk threshold of 85.",
+                    "Check Domain Age: the domain has been registered for 18 years. This gives us additional context about the website, but does not prove that it is safe.",
+                    "Consider all the results together. IPQS did not flag this link in these checks, but that does not guarantee it is harmless."
+                ],
                   note: "This is an example to help explain the results. Actual results may differ depending on the link being analyzed."
               }
           },
@@ -275,5 +277,109 @@ const toolInfo = {
         ]
       }
     ]
-  }  
+  },
+  
+  // URLHaus info
+  
+urlhaus: {
+    title: "About URLhaus",
+    sections: [
+        {
+            heading: "What is URLhaus?",
+            paragraphs: [
+                "URLhaus is a threat intelligence service that collects and shares links reported for distributing malware (harmful software).",
+                "It helps identify links that may lead to websites used to deliver harmful files or infect devices."
+            ],
+            definitions: [
+                {
+                    term: "Spamhaus Domain Blocklist (DBL)",
+                    meaning: "A list maintained by Spamhaus that identifies domains associated with spam, phishing, malware, and other abusive activity."
+                },
+                {
+                    term: "Spam URI Realtime Blocklists (SURBL)",
+                    meaning: "Lists that identify website addresses and domains associated with spam, phishing, malware, and other harmful activity."
+                }
+            ]
+        },
+        {
+            heading: "How does PhishCatcher use it?",
+            paragraphs: [
+                "When you analyze an email, PhishCatcher checks the links found in the message against URLhaus.",
+                "If a link has been reported, URLhaus can provide details such as its reported threat type, whether it is still online, and whether it appears on certain blocklists."
+            ]
+        },
+        {
+            heading: "How do I read the results?",
+            paragraphs: [
+                "URLhaus provides several details to help you understand a reported link:"
+            ],
+            definitions: [
+                {
+                    term: "URL Status",
+                    meaning: "Indicates whether the reported link is still accessible. Online means the link can currently be reached; Offline means it could not be reached when checked. Online does not mean the link is safe."
+                },
+                {
+                    term: "Host",
+                    meaning: "The website or server hosting the reported link."
+                },
+                {
+                    term: "Date Added",
+                    meaning: "When the link was added to URLhaus's database."
+                },
+                {
+                    term: "Threat Type",
+                    meaning: "Describes the type of harmful activity associated with the link. For example, malware_download means the link was reported for distributing harmful software that could infect a device."
+                },
+                {
+                    term: "URLhaus Blocklist",
+                    meaning: "Indicates whether the URL appears on URLhaus's list of reported harmful links. Blocked means it was found on the list; Not blocked means it was not found."
+                },
+                {
+                    term: "Spamhaus DBL",
+                    meaning: "Indicates whether the domain appears on Spamhaus's Domain Blocklist. Blocked means it was found on the list; Not blocked means it was not found."
+                },
+                {
+                    term: "SURBL",
+                    meaning: "Indicates whether the domain appears on a SURBL list. Blocked means it was found on the list; Not blocked means it was not found."
+                }
+            ],
+            paragraphsAfterDefinitions: [
+                "Each blocklist checks for different types of suspicious activity. A domain not appearing on one list does not guarantee that it is safe. Consider all the results together when evaluating a link."
+            ]
+        },
+        {
+            heading: "Let's look at an example",
+            example: {
+                description: "Imagine an email contains a link that URLhaus has previously reported. Here is an example of the information it returns:",
+                total: 0,
+                results: [
+                    { label: "URL Status", count: "Online" },
+                    { label: "Host", count: "example.com" },
+                    { label: "Date Added", count: "2026-11-15 10:30:00 UTC" },
+                    { label: "Threat Type", count: "malware_download" },
+                    { label: "URLhaus Blocklist", count: "Blocked" },
+                    { label: "Spamhaus DBL", count: "Not blocked" },
+                    { label: "SURBL", count: "Not blocked" }
+                ],
+                steps: [
+                  "Start with URL Status: the link is Online, which means it can still be accessed. Remember, that does not mean it's safe to open.",
+                  "Look at Threat Type: malware_download means the link was reported for distributing harmful software.",
+                  "Check URLhaus Blocklist: the result is Blocked, meaning URLhaus has this link on its list of reported harmful links.",
+                  "Look at Spamhaus DBL and SURBL: neither list identified this domain. However, that does not cancel out the URLhaus warning.",
+                  "Consider all the results together. URLhaus has reported this link for distributing harmful software, so it should be treated with caution."
+                ],
+                note: "This is an illustrative example. Actual results may differ depending on the link being analyzed."
+            }
+        },
+        {
+            heading: "Things to keep in mind",
+            paragraphs: [
+                "URLhaus focuses on links reported for distributing malware. It does not check for every type of online threat.",
+                "A link that is not found in URLhaus may still be harmful. It may simply not have been reported or added to the database.",
+                "Online only describes whether a link is accessible. It does not mean the website is trustworthy.",
+                "Blocklist results provide additional information, but Not blocked does not guarantee that a link is safe."
+            ]
+        }
+    ]
+  }
 };

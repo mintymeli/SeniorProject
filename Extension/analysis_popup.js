@@ -980,8 +980,9 @@ window.addEventListener("message", (event) => {
         toolHeading.textContent = tool.name;
         
         
-        // Add Learn more for VirusTotal and IPQualityScore
-        if (tool.name === "VirusTotal" || tool.name === "IPQualityScore") {
+        // Add Learn more for VirusTotal, IPQualityScore, and URLhaus
+        //if (tool.name === "VirusTotal" || tool.name === "IPQualityScore") {
+        if (tool.name === "VirusTotal" || tool.name === "IPQualityScore" || tool.name === "URLhaus") {
             const learnMore = document.createElement("span");
             learnMore.textContent = "ⓘ Learn more";
             learnMore.classList.add("finding-learn-more");
@@ -1002,6 +1003,13 @@ window.addEventListener("message", (event) => {
                         "About IPQualityScore",
                         "IPQualityScore analyzes URLs for signs of potentially unsafe or suspicious activity."
                     );
+                }
+                else if (tool.name === "URLhaus") {
+                  openInfoDialog(
+                      "urlhaus",
+                      "About URLhaus",
+                      "URLhaus collects and shares links reported for distributing malware. It helps identify links associated with harmful software."
+                  );
                 }
             });
 
