@@ -828,7 +828,9 @@ body {
   top: 20px;
   width: 85%;
   max-width: 320px;
+  min-width: 260px;
   max-height: 70vh;
+  min-height: 300px;
   margin: 0;
   padding: 0;
   border: 1px solid var(--border);
@@ -838,6 +840,7 @@ body {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   box-sizing: border-box;
+  resize: both;
 }
 
 .finding-info-header {
