@@ -83,7 +83,7 @@ const toolInfo = {
             "Look at Undetected: 20 vendors did not identify a threat.",
             "Consider all the results together. The 5 malicious detections are worth investigating, even though many other vendors did not flag the domain."
           ],
-          note: "This example uses a domain, but the same explanation applies to IP address results. The values may differ depending on the indicator being analyzed."
+          note: "This example uses a domain, but the same explanation applies to IP address and URL results. The values may differ depending on the indicator being analyzed."
         }
       },
 

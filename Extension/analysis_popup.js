@@ -96,21 +96,40 @@ window.addEventListener("message", (event) => {
   const urlIPQSResults = threatIntelResults?.ipqs_results || [];
   const urlhausResults = threatIntelResults?.urlhaus_results || [];
 
-  // Collect each unique URL found by the analysis tools
-  const analyzedUrls = [
-    ...new Set([
-      ...urlVirusTotalResults.map(result => result.url || result.indicator),
-      ...urlIPQSResults.map(result => result.url),
-      ...urlhausResults.map(result => result.url)
-    ].filter(Boolean))
-  ];
-
-  // Find a tool's result for a specific URL
-  function findUrlResult(results, url) {
-    return results.find(result =>
-      (result.url || result.indicator) === url
-    ) || null;
-  }
+  // TEMPORARY UI TEST DATA
+  const useMockUrlResults = true;
+  if (useMockUrlResults) {
+    urlVirusTotalResults.push({
+        url: "https://example.com/account/verify",
+        status: "Report found",
+        malicious: 2,
+        suspicious: 1,
+        harmless: 65,
+        undetected: 24,
+        total_vendors: 92
+    });
+    urlIPQSResults.push({
+      url: "https://example.com/account/verify",
+      status: "Report found",
+      safe: true,
+      suspicious: false,
+      domain: "example.com",
+      malware: false,
+      phishing: false,
+      risk_score: 12,
+      domain_age: "18 years"
+  });
+  urlhausResults.push({
+    url: "https://example.com/account/verify",
+    url_status: "online",
+    host: "example.com",
+    date_added: "2026-11-15 10:30:00 UTC",
+    threat: "malware_download",
+    urlhaus_blocklist: "Blocked",
+    spamhaus_dbl: "Not blocked",
+    surbl: "Not blocked"
+  });
+}
 
   // Create one unique list of URLs across all three tools
   const allUrls = [
@@ -948,14 +967,46 @@ window.addEventListener("message", (event) => {
         toolToggle.type = "button";
         toolToggle.setAttribute("aria-expanded", "false");
     
-        const toolHeading = document.createElement("span");
+        /*const toolHeading = document.createElement("span");
         toolHeading.textContent = tool.name;
     
         const chevron = document.createElement("span");
         chevron.className = "url-tool-chevron";
         chevron.textContent = "⌄";
     
-        toolToggle.append(toolHeading, chevron);
+        toolToggle.append(toolHeading, chevron);*/
+        
+        const toolHeading = document.createElement("span");
+        toolHeading.textContent = tool.name;
+        
+        // Add Learn more for VirusTotal
+        if (tool.name === "VirusTotal") {
+            const learnMore = document.createElement("span");
+            learnMore.textContent = "ⓘ Learn more";
+            learnMore.classList.add("finding-learn-more");
+            learnMore.title = "Learn more about VirusTotal Results";
+        
+            learnMore.addEventListener("click", (event) => {
+                event.stopPropagation();
+        
+                openInfoDialog(
+                    "virustotal",
+                    "About VirusTotal",
+                    "VirusTotal checks domains and IP addresses against multiple security vendors and threat intelligence sources to identify known malicious or suspicious activity."
+                );
+            });
+        
+            toolToggle.append(toolHeading, learnMore);
+        } else {
+            toolToggle.appendChild(toolHeading);
+        }
+        
+        const chevron = document.createElement("span");
+        chevron.className = "url-tool-chevron";
+        chevron.textContent = "⌄";
+        
+        toolToggle.appendChild(chevron);
+        
     
         const toolContent = document.createElement("div");
         toolContent.className = "url-tool-content";
