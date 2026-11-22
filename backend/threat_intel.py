@@ -418,20 +418,21 @@ def analyze_urlscan(url):
         )
 
         # Wait for URLscan to finish processing
-        time.sleep(30)
+        time.sleep(6)
 
         # Checks for the completed scan
-        for attempt in range(8):
+        for attempt in range(7):
 
             result_response = httpx.get(
                 result_endpoint,
                 headers=headers,
-                timeout=20
+                timeout=10
             )
 
             # Report is still processing
             if result_response.status_code == 404:
-                time.sleep(10)
+                if attempt < 6:
+                    time.sleep(5)
                 continue
 
             # Handles other HTTP errors
@@ -735,7 +736,7 @@ def analyze_tools(urls, attachment_hashes, header_domains=None, header_ips=None)
     # All multiple checks to run at the same time
     with ThreadPoolExecutor(max_workers=10) as executor:
 
-        # Check each URL once with VirusTotal and IPQS
+        # Check each URL once with VirusTotal, IPQS, URLscan,and URLhaus
         for url in dict.fromkeys(urls):
 
             # Starts checking URLs with VT
@@ -847,7 +848,6 @@ def analyze_tools(urls, attachment_hashes, header_domains=None, header_ips=None)
             # Adds the result to the correct list
             results[result_type].append(result)
 
-    
     # ----- Analyzes IP addresses returned by URLscan with AbuseIPDB and VT -----
 
         # Lists to store the results from each tool
