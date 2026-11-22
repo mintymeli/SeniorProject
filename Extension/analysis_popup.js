@@ -979,34 +979,43 @@ window.addEventListener("message", (event) => {
         const toolHeading = document.createElement("span");
         toolHeading.textContent = tool.name;
         
-        // Add Learn more for VirusTotal
-        if (tool.name === "VirusTotal") {
+        
+        // Add Learn more for VirusTotal and IPQualityScore
+        if (tool.name === "VirusTotal" || tool.name === "IPQualityScore") {
             const learnMore = document.createElement("span");
             learnMore.textContent = "ⓘ Learn more";
             learnMore.classList.add("finding-learn-more");
-            learnMore.title = "Learn more about VirusTotal Results";
-        
+            learnMore.title = `Learn more about ${tool.name} Results`;
+
             learnMore.addEventListener("click", (event) => {
                 event.stopPropagation();
-        
-                openInfoDialog(
-                    "virustotal",
-                    "About VirusTotal",
-                    "VirusTotal checks domains and IP addresses against multiple security vendors and threat intelligence sources to identify known malicious or suspicious activity."
-                );
+
+                if (tool.name === "VirusTotal") {
+                    openInfoDialog(
+                        "virustotal",
+                        "About VirusTotal",
+                        "VirusTotal checks domains and IP addresses against multiple security vendors and threat intelligence sources to identify known malicious or suspicious activity."
+                    );
+                } else if (tool.name === "IPQualityScore") {
+                    openInfoDialog(
+                        "ipqs",
+                        "About IPQualityScore",
+                        "IPQualityScore analyzes URLs for signs of potentially unsafe or suspicious activity."
+                    );
+                }
             });
-        
+
             toolToggle.append(toolHeading, learnMore);
         } else {
             toolToggle.appendChild(toolHeading);
         }
+
         
         const chevron = document.createElement("span");
         chevron.className = "url-tool-chevron";
         chevron.textContent = "⌄";
         
-        toolToggle.appendChild(chevron);
-        
+        toolToggle.appendChild(chevron);        
     
         const toolContent = document.createElement("div");
         toolContent.className = "url-tool-content";

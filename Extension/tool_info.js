@@ -103,6 +103,97 @@ const toolInfo = {
       text: "The total number of vendors includes all vendors whose results are part of the analysis, including those that did not provide a malicious, suspicious, harmless, or undetected classification. Because of this, the four category counts may not add up to the total."
     }
   },
+  
+  // IPQS info
+  ipqs: {
+      title: "About IPQualityScore",
+      sections: [
+          {
+              heading: "What is IPQualityScore?",
+              paragraphs: [
+                  "IPQualityScore (IPQS) is a service that checks links for signs of potentially unsafe or suspicious activity.",
+                  "It looks for warning signs that a website may be connected to scams, phishing, or malware."
+              ]
+          },
+          {
+              heading: "How does PhishCatcher use it?",
+              paragraphs: [
+                  "When you analyze an email, PhishCatcher sends the links found in the message to IPQualityScore for analysis.",
+                  "IPQS checks each link and returns information that can help you understand whether it may be risky."
+              ]
+          },
+          {
+              heading: "How do I read the results?",
+              paragraphs: [
+                  "IPQualityScore provides several results to help you understand the link:"
+              ],
+              definitions: [
+                  {
+                      term: "Safe",
+                      meaning: "Indicates whether IPQS considers the link safe based on its analysis. A safe result does not guarantee that the website is harmless."
+                  },
+                  {
+                      term: "Suspicious",
+                      meaning: "Indicates whether IPQS found signs that the link may be connected to suspicious activity."
+                  },
+                  {
+                      term: "Domain",
+                      meaning: "The website name associated with the link's destination."
+                  },
+                  {
+                      term: "Malware",
+                      meaning: "Indicates whether the link is associated with harmful software that could affect a device."
+                  },
+                  {
+                      term: "Phishing",
+                      meaning: "Indicates whether the link may lead to a website designed to trick people into sharing personal information, such as passwords."
+                  },
+                  {
+                      term: "Risk Score",
+                      meaning: "A score from 0 to 100 that estimates how risky a link may be. A higher score means IPQS sees more signs of risk. Scores of 85 or higher are considered high risk by IPQS."
+                  },
+                  {
+                      term: "Domain Age",
+                      meaning: "How long the website's domain has been registered. A newly registered domain may deserve extra attention, but its age alone does not mean it is unsafe."
+                  }
+              ],
+              paragraphsAfterDefinitions: [
+                  "Look at these results together rather than relying on just one of them."
+              ]
+          },
+          {
+              heading: "Let's look at an example",
+              example: {
+                  description: "Imagine an email contains a link to example.com. IPQualityScore analyzes the link and returns these results:",
+                  total: 0,
+                  results: [
+                      { label: "Safe", count: "Yes" },
+                      { label: "Suspicious", count: "No" },
+                      { label: "Domain", count: "example.com" },
+                      { label: "Malware", count: "No" },
+                      { label: "Phishing", count: "No" },
+                      { label: "Risk Score", count: 12 },
+                      { label: "Domain Age", count: "18 years ago" }
+                  ],
+                  steps: [
+                      "The link is marked as safe and is not flagged as suspicious.",
+                      "IPQS did not identify signs of malware or phishing.",
+                      "The risk score is 12, which is below IPQS's high-risk threshold of 85.",
+                      "The domain has been registered for 18 years. This gives us additional context, but does not prove that the website is safe."
+                  ],
+                  note: "This is an example to help explain the results. Actual results may differ depending on the link being analyzed."
+              }
+          },
+          {
+              heading: "Things to keep in mind",
+              paragraphs: [
+                  "IPQualityScore provides warning signs, not a guarantee that a website is safe or harmful.",
+                  "A low risk score does not guarantee that a link is safe. A high score means the link deserves closer attention.",
+                  "A website's age is only one clue. Both new and older websites can be used for harmful activity."
+              ]
+          }
+      ]
+  },
 
   // AbuseIPDB info
   abuseipdb: {
