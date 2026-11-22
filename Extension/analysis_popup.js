@@ -393,8 +393,9 @@ window.addEventListener("message", (event) => {
   // Header domain reputation
   const domainResults = threatIntelResults?.header_domain_results || [];
 
-  let virusTotalDialog = null;
-  let abuseIPDBDialog = null;
+  //let virusTotalDialog = null;
+  //let abuseIPDBDialog = null;
+  const openInfoDialogs = new Map();
 
   if (domainResults.length > 0) {
     const resultContent = document.createElement("div");
@@ -1203,11 +1204,14 @@ window.addEventListener("message", (event) => {
     });
 
     addFinding(
-        "URL Analysis",
-        "URL Findings",
-        "Reputation results for URLs found in the email.",
-        "",
-        urlCardsContainer
+      "URL Analysis",
+      "URL Findings",
+      {
+          meaning: "This section shows the results of checking links found in the email against security tools and threat intelligence sources.",
+          whyItMatters: "Links in an email can lead to phishing pages, websites that steal personal information, or downloads containing harmful software. Reviewing these results can help you identify potentially unsafe links before opening them."
+      },
+      "",
+      urlCardsContainer
     );
   }
   
@@ -1329,23 +1333,17 @@ window.addEventListener("message", (event) => {
 
   // Creates a reusable information popup
   function openInfoDialog(tool, titleText, explanationText) {
-    const isVirusTotal = tool === "virustotal";
-    const existingDialog = isVirusTotal
-      ? virusTotalDialog
-      : abuseIPDBDialog;
+    // Prevent multiple windows for the same tool
+    if (openInfoDialogs.has(tool)) return;
 
-    if (existingDialog) return;
+    //if (existingDialog) return;
 
     // Get the information stored in tool_info.js
     const info = toolInfo[tool];
 
     const infoDialog = document.createElement("dialog");
 
-    if (isVirusTotal) {
-      virusTotalDialog = infoDialog;
-    } else {
-      abuseIPDBDialog = infoDialog;
-    }
+    openInfoDialogs.set(tool, infoDialog);
 
     infoDialog.classList.add("finding-info-dialog");
 
@@ -1367,11 +1365,7 @@ window.addEventListener("message", (event) => {
       event.stopPropagation();
       infoDialog.remove();
 
-      if (isVirusTotal) {
-        virusTotalDialog = null;
-      } else {
-        abuseIPDBDialog = null;
-      }
+      openInfoDialogs.delete(tool);
     });
 
     closeButton.addEventListener("pointerdown", (event) => {
@@ -1651,15 +1645,16 @@ window.addEventListener("message", (event) => {
     whyText.textContent = explanation.whyItMatters;
 
     // Technical details button
+    /*
     const technicalButton = document.createElement("button");
     technicalButton.classList.add("finding-technical-button");
-    technicalButton.textContent = "View technical details";
+    technicalButton.textContent = "View technical details";*/
 
     // Technical details content
-    const technicalContent = document.createElement("p");
+    /*const technicalContent = document.createElement("p");
     technicalContent.classList.add("finding-technical-details");
     technicalContent.textContent = technicalDetails;
-    technicalContent.hidden = true;
+    technicalContent.hidden = true;*/
 
     // Expand and collapse the finding
     titleButton.addEventListener("click", () => {
@@ -1668,12 +1663,13 @@ window.addEventListener("message", (event) => {
     });
 
     // Show and hide technical details
+    /*
     technicalButton.addEventListener("click", () => {
       technicalContent.hidden = !technicalContent.hidden;
       technicalButton.textContent = technicalContent.hidden
         ? "View technical details"
         : "Hide technical details";
-    });
+    });*/
 
     // Assemble finding
     // content.append(categoryLabel, explanationText, technicalButton, technicalContent);
@@ -1685,8 +1681,8 @@ window.addEventListener("message", (event) => {
       meaningText,
       whyLabel,
       whyText,
-      technicalButton,
-      technicalContent
+      //technicalButton,
+      //technicalContent
     );
     card.append(titleButton, content);
     container.appendChild(card);
