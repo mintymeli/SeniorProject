@@ -97,6 +97,7 @@ window.addEventListener("message", (event) => {
   const urlhausResults = threatIntelResults?.urlhaus_results || [];
 
   // TEMPORARY UI TEST DATA
+  /*
   const useMockUrlResults = true;
   if (useMockUrlResults) {
     urlVirusTotalResults.push({
@@ -129,7 +130,7 @@ window.addEventListener("message", (event) => {
     spamhaus_dbl: "Not blocked",
     surbl: "Not blocked"
   });
-}
+}*/
 
   // Create one unique list of URLs across all three tools
   const allUrls = [
