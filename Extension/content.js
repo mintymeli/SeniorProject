@@ -270,7 +270,9 @@ function phishcatcherHighlightLinks(flagged) {
               remediation: response.remediation,
               // send header analysis and threat intel results
               header_analysis: response.header_analysis,
-              threat_intel_results: response.threat_intel_results
+              threat_intel_results: response.threat_intel_results,
+              // text read from PDF / Word attachments (shown in the Findings tab)
+              attachment_text: response.attachment_text
             },
             "*"
           );

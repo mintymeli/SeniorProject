@@ -7,8 +7,13 @@ import zipfile
 from body_classifier import clean_body
 
 try:
-    from pypdf import PdfReader
+    from body_classifier import collect_evidence
 except ImportError:
+    collect_evidence = None
+
+try:
+    from pypdf import PdfReader
+except ImportError:  # the checks still work, we just can't read PDF text
     PdfReader = None
 
 FREE_MAIL = {
@@ -16,18 +21,18 @@ FREE_MAIL = {
     "icloud.com", "proton.me", "protonmail.com", "mail.com", "gmx.com",
 }
 
-
+# Words that make an address look like a business or an official team.
 BUSINESS_WORDS = [
     "service", "services", "company", "support", "helpdesk", "official", "admin",
     "security", "billing", "payroll", "recruit", "hiring", "lawyer", "attorney",
     "bank", "invoice", "accounts",
 ]
 
-MIN_BODY_CHARS = 20      
-MANY_RECIPIENTS = 10
+MIN_BODY_CHARS = 20       # same cutoff body_classifier uses for "no readable text"
+MANY_RECIPIENTS = 10      # visible To/Cc addresses; real mass mail normally uses Bcc
 MAX_PDF_PAGES = 5
 MAX_PDF_CHARS = 5000
-MAX_DOCX_XML_BYTES = 5_000_000 
+MAX_DOCX_XML_BYTES = 5_000_000   # refuse to unpack a suspiciously huge document.xml (zip bombs)
 WORD_EXTENSIONS = (".docx", ".docm", ".dotm", ".doc")
 
 
@@ -43,7 +48,7 @@ def list_attachments(payload: dict) -> list[dict]:
             found.append({
                 "filename": filename,
                 "mime": part.get("mimeType", ""),
-                "data": part.get("body", {}).get("data"),
+                "data": part.get("body", {}).get("data"),  # background.js fills this in
             })
         for child in part.get("parts", []) or []:
             walk(child)
@@ -92,7 +97,7 @@ def docx_text(attachment: dict) -> str:
             if info.file_size > MAX_DOCX_XML_BYTES:
                 return ""
             xml = archive.read("word/document.xml").decode("utf-8", errors="replace")
-        xml = re.sub(r"</w:p>|<w:br\s*/?>|<w:tab\s*/?>", " ", xml)
+        xml = re.sub(r"</w:p>|<w:br\s*/?>|<w:tab\s*/?>", " ", xml)      # paragraph / line breaks become spaces
         text = html.unescape(re.sub(r"<[^>]+>", "", xml))
         return re.sub(r"\s+", " ", text).strip()[:MAX_PDF_CHARS]
     except Exception as error:
@@ -101,7 +106,7 @@ def docx_text(attachment: dict) -> str:
 
 
 def has_macros(attachment: dict) -> bool:
-    """True when a Word file carries macros"""
+    """True when a Word file carries macros (small programs that can run when it is opened)."""
     if not is_word(attachment):
         return False
     name = attachment["filename"].lower()
@@ -115,6 +120,54 @@ def has_macros(attachment: dict) -> bool:
         except Exception:
             return False
     return b"_VBA_PROJECT" in raw or b"VBA" in raw[:200000]   # old .doc files
+
+
+def attachment_texts(payload: dict) -> list[dict]:
+    """
+    What to show the user in the Findings tab: the text read from each PDF / Word attachment,
+    plus the scam phrases inside it (for highlighting) and whether it has macros.
+    [{filename, kind: "pdf"|"word", text, macros, phrases: [{phrase, severity}], note}]
+    """
+    severity_of = {"Sensitive Info Request": "High", "Urgency Language": "Medium", "Generic Greeting": "Low"}
+    reason_of = {
+        "Sensitive Info Request": "asks for sensitive information",
+        "Urgency Language": "pressures you to act quickly",
+        "Generic Greeting": "uses a generic greeting",
+    }
+    results = []
+    for attachment in list_attachments(payload):
+        is_pdf = attachment["mime"] == "application/pdf" or attachment["filename"].lower().endswith(".pdf")
+        if not (is_pdf or is_word(attachment)):
+            continue
+        text = pdf_text(attachment) if is_pdf else docx_text(attachment)
+        note = ""
+        if not text:
+            if is_pdf and PdfReader is None:
+                note = "PDF reading isn't set up on this computer."
+            elif is_pdf:
+                note = "No readable text found. It may be a scanned image."
+            elif attachment["filename"].lower().endswith(".doc"):
+                note = "This older Word format can't be read. Don't open it unless you were expecting it."
+            else:
+                note = "No readable text found in this file."
+        rank = {"Low": 0, "Medium": 1, "High": 2}
+        best = {}   # one entry per phrase, keeping its most serious label
+        if text and collect_evidence:
+            for kind, items in collect_evidence(clean_body(text)).items():
+                for item in items:
+                    key, label = item["phrase"].lower(), severity_of.get(kind, "Low")
+                    if key not in best or rank[label] > rank[best[key]["severity"]]:
+                        best[key] = {"phrase": item["phrase"], "severity": label, "reason": reason_of.get(kind, "")}
+        phrases = list(best.values())
+        results.append({
+            "filename": attachment["filename"],
+            "kind": "pdf" if is_pdf else "word",
+            "text": text,
+            "macros": has_macros(attachment),
+            "phrases": phrases,
+            "note": note,
+        })
+    return results
 
 
 def recipient_count(header_map: dict) -> int:

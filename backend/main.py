@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware 
-from email_checks import analyze_attachments, analyze_sender_and_recipients
+from email_checks import analyze_attachments, analyze_sender_and_recipients, attachment_texts
 from threat_intel import analyze_tools, vt_result
 import base64
 import re 
@@ -618,6 +618,7 @@ async def analyze_email(request: Request):
         "remediation": remediation,
         "flagged_links": flagged_links(threat_intel_results, email_sender),
         "threat_intel_results": threat_intel_results,
+        "attachment_text": attachment_texts(email_json.get("payload", {})),
     }
 
 if __name__ == "__main__":

@@ -1216,11 +1216,118 @@ window.addEventListener("message", (event) => {
     );
   }
   
+  // Text read from PDF / Word attachments, so the user can read it before opening the file
+  const attachmentTexts = event.data.attachment_text || [];
+
+  if (attachmentTexts.length > 0) {
+    const attachmentContent = document.createElement("div");
+    attachmentContent.classList.add("finding-results");
+
+    attachmentTexts.forEach(file => {
+      const card = document.createElement("div");
+      card.classList.add("finding-result-item");
+
+      const name = document.createElement("strong");
+      name.textContent = file.filename;
+      card.appendChild(name);
+
+      if (file.macros) {
+        const macroWarning = document.createElement("p");
+        macroWarning.classList.add("attachment-warning");
+        macroWarning.textContent =
+          "This file contains macros (small programs that run when it is opened). Don't open it unless you were expecting it.";
+        card.appendChild(macroWarning);
+      }
+
+      if (file.text) {
+        const box = document.createElement("div");
+        box.classList.add("attachment-text-box");
+
+        // Mark scam phrases. Text is added with textContent only, so nothing in the file can run as code.
+        const marks = (file.phrases || []).filter(item => item.phrase);
+        const pattern = marks.length
+          ? new RegExp(
+              "(" + marks
+                .map(item => item.phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+                .join("|") + ")",
+              "gi"
+            )
+          : null;
+
+        const parts = pattern ? file.text.split(pattern) : [file.text];
+        parts.forEach(part => {
+          const match = marks.find(item => item.phrase.toLowerCase() === part.toLowerCase());
+          if (match) {
+            const mark = document.createElement("mark");
+            mark.classList.add("attachment-mark-" + match.severity.toLowerCase());
+            mark.textContent = part;
+            box.appendChild(mark);
+          } else {
+            box.appendChild(document.createTextNode(part));
+          }
+        });
+
+        card.appendChild(box);
+      } else {
+        const note = document.createElement("p");
+        note.classList.add("url-tool-status");
+        note.textContent = file.note || "No readable text found in this file.";
+        card.appendChild(note);
+      }
+
+      attachmentContent.appendChild(card);
+    });
+
+    // Results sentence: what was found in each file's text, strongest warning first
+    const severityOrder = { High: 0, Medium: 1, Low: 2 };
+    const resultSentences = attachmentTexts.map(file => {
+      if (!file.text) {
+        return `${file.filename}: ${file.note || "no readable text was found."}`;
+      }
+
+      const byReason = new Map();
+      (file.phrases || []).forEach(item => {
+        const reason = item.reason || "contains wording often used in scams";
+        if (!byReason.has(reason)) {
+          byReason.set(reason, { severity: item.severity, phrases: [] });
+        }
+        const group = byReason.get(reason);
+        group.phrases.push(`"${item.phrase}"`);
+        if (severityOrder[item.severity] < severityOrder[group.severity]) {
+          group.severity = item.severity;
+        }
+      });
+
+      if (byReason.size === 0) {
+        return `${file.filename}: no scam wording was found in the text.`;
+      }
+
+      const parts = [...byReason.entries()]
+        .sort((a, b) => severityOrder[a[1].severity] - severityOrder[b[1].severity])
+        .map(([reason, group]) => `${reason} (${group.phrases.join(", ")})`);
+
+      return `${file.filename}: ${parts.join("; ")}.`;
+    });
+
+    addFinding(
+      "Text inside attachments",
+      "Attachment Analysis · Text",
+      {
+        meaningLabel: "Results",
+        meaning: resultSentences.join(" "),
+        whyItMatters: "Reading the text here is safer than opening the file. Long files are shortened, so this may not be the full text."
+      },
+      "",
+      attachmentContent
+    );
+  }
+
   // display non empty-state message when URLs were found
   if (
     authFindingsCount === 0 &&
     headerFindingsCount === 0 &&
-    urlFindingsCount === 0
+    urlFindingsCount === 0 &&
+    attachmentTexts.length === 0
   ) {
     findingsContainer.textContent =
       "No noteworthy header or authentication findings detected.";
@@ -1631,7 +1738,7 @@ window.addEventListener("message", (event) => {
     //const explanationText = document.createElement("p");
     //explanationText.textContent = explanation;
     const meaningLabel = document.createElement("strong");
-    meaningLabel.textContent = "What it means";
+    meaningLabel.textContent = explanation.meaningLabel || "What it means";
 
     const explanationDivider = document.createElement("div");
     explanationDivider.classList.add("finding-explanation-divider");
@@ -1700,5 +1807,3 @@ window.addEventListener("message", (event) => {
     );
   }
 });
-
-
