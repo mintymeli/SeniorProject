@@ -1068,6 +1068,73 @@ window.addEventListener("message", (event) => {
               });
       
               toolContent.appendChild(metricsContainer);
+
+              // Displays the final URL by VirusTotal 
+              const finalDestination = tool.result.final_destination;
+
+              if (finalDestination) {
+                  const destinationContainer = document.createElement("div");
+                  destinationContainer.className = "finding-final-destination";
+
+                  const destinationLabel = document.createElement("strong");
+                  destinationLabel.textContent = "Final URL";
+
+                  // Creates the section that holds the URL information 
+                  const destinationDisplay = document.createElement("div");
+
+                  let destinationPath = "";
+
+                  try {
+                    // Gets the path portion of the final URL
+                    const parsedUrl = new URL(finalDestination);
+                    destinationDomain = parsedUrl.hostname;
+                    destinationPath = parsedUrl.pathname + parsedUrl.search;
+                  } catch (error) {
+                    // Leaved the path empty if the URL cannot be read
+                  }
+
+                  // Displays a shortened version of the URL path
+                  const destinationPathElement = document.createElement("p");
+                  destinationPathElement.className = "url-finding-path";
+
+                  const maxLength = 45;
+
+                  destinationPathElement.textContent =
+                    destinationPath.length > maxLength
+                      ? destinationPath.substring(0, maxLength) + "..."
+                      : destinationPath;
+
+                  // Creates the View Full URL button
+                  const destinationButton = document.createElement("button");
+                  destinationButton.className = "url-view-full-button";
+                  destinationButton.textContent = "View full URL";
+
+                  // Displays the complete URL when clicked
+                  const fullDestination = document.createElement("p");
+                  fullDestination.className = "url-full-text";
+                  fullDestination.textContent = finalDestination;
+                  fullDestination.hidden = true;
+
+                  // Shows or hides the complete URL when the button is clicked
+                  destinationButton.addEventListener("click", () => {
+                    fullDestination.hidden = !fullDestination.hidden;
+
+                    destinationButton.textContent = fullDestination.hidden
+                      ? "View full URL"
+                      : "Hide full URL";
+                });
+
+                // Adds everything to the Final URL section
+                destinationContainer.append(
+                  destinationLabel,
+                  destinationPathElement,
+                  destinationButton,
+                  fullDestination
+              );
+                  // Displays the Final URL section in the VirusTotal results
+                  toolContent.appendChild(destinationContainer);
+              }
+
           } else {
               toolStatus.textContent =
                   tool.result?.error ||

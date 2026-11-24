@@ -100,9 +100,26 @@ def analyze_url_virustotal(url):
         # Extracts the analysis information from the report
         attributes = response.json()["data"]["attributes"]
 
+        # Gets the URL redirection chain, if available
+        redirect_chain = attributes.get("redirection_chain", [])
+
+        # Gets the final destination from the redirection chain
+        final_destination = url
+
+        if redirect_chain:
+            # Gets the last URL in the redirection list 
+            last_redirect = redirect_chain[-1]
+
+            if isinstance(last_redirect, str):
+                final_destination = last_redirect
+
+            elif isinstance(last_redirect, dict):
+                final_destination = last_redirect.get("url", url)
+
         return {
             "url": url,
             "status": "Report found",
+            "final_destination": final_destination,
             **_get_detection_counts(attributes)
         }
 

@@ -402,6 +402,11 @@ async def analyze_email(request: Request):
     if threat_intel_results["url_results"]:
         for result in threat_intel_results["url_results"]:
             print(vt_result(result, "URL"))
+
+            # Displays the final destination if a VT report was found
+            if result.get("status") == "Report found":
+                print(f"Final Destination: {result.get('final_destination', result.get('url'))}")
+
             print()
     else:
         print("No URLs found.")
