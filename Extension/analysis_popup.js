@@ -1592,6 +1592,42 @@ window.addEventListener("message", (event) => {
           sectionContainer.appendChild(paragraph);
         });
 
+        // Final URL redirect example
+        if (section.redirectExample) {
+          const redirect = section.redirectExample;
+
+        // Example box
+        const exampleBox = document.createElement("div");
+        exampleBox.classList.add("redirect-example-box");
+
+        // Example heading
+        const exampleHeading = document.createElement("h5");
+        exampleHeading.textContent = "Example:";
+        exampleHeading.classList.add("redirect-example-heading");
+
+        // Original URL
+        const originalUrl = document.createElement("p");
+        originalUrl.textContent = `Original URL: ${redirect.original}`;
+
+        // Redirect arrow
+        const redirectArrow = document.createElement("p");
+        redirectArrow.textContent = "↓  Redirects to";
+        redirectArrow.classList.add("redirect-example-arrow");
+
+        // Final URL
+        const finalUrl = document.createElement("p");
+        finalUrl.textContent = `Final URL: ${redirect.destination}`;
+
+        exampleBox.append(
+          exampleHeading,
+          originalUrl,
+          redirectArrow,
+          finalUrl
+        );
+
+        sectionContainer.appendChild(exampleBox);
+      }
+
         // Example results
         if (section.example) {
           const example = section.example;

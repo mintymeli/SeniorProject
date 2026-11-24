@@ -59,8 +59,20 @@ const toolInfo = {
         ],        
         paragraphsAfterDefinitions: [
         "A vendor fraction shows how many vendors gave a particular classification compared with the total number of vendors included in the analysis.",
-        ]
+        ],
+      }, 
 
+      {
+          heading: "What is the Final URL?",
+          paragraphs: [
+            "The final url is the destination you reach after clicking the original url. Sometimes, it may pass through several different web pages before reaching its final destination.",
+            "PhishCatcher uses VirusTotal to help identify where the original URL may eventually lead. This gives a better idea of its potential destination before visiting the site.",
+            "In the example below, the Original URL is the link displayed in the email. When clicked, it may redirect to another website. The Final URL shows where the link eventually leads."
+      ],
+      redirectExample: {
+        original: "example.com/redirect",
+        destination: "example.com/download/file"
+      },
       },
 
       {
@@ -92,6 +104,7 @@ const toolInfo = {
         paragraphs: [
           "Different security vendors may reach different conclusions about the same indicator.",
           "Reports may be incomplete or outdated, so the results may not reflect the indicator's current activity.",
+          "A URL's final destination may not always be available or accurately identified.",
           "Zero detections does not guarantee that a domain or IP address is safe.",
           "A detection is a reason to investigate further, not proof by itself that an email is malicious."
         ]

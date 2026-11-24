@@ -1210,3 +1210,35 @@ body {
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
+
+/* Final URL example box */
+.redirect-example-box {
+  background-color: #ffffff;
+  border: 1px solid #e8ecf3;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 12px 0;
+}
+
+/* Example heading */
+.redirect-example-heading {
+  color: var(--blue);
+  padding: 0;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  text-align: left;
+}
+
+/* URL text */
+.redirect-example-box p {
+  font-size: 11px;
+  margin: 0 0 12px 0;
+}
+
+/* Redirect arrow */
+.redirect-example-box .redirect-example-arrow {
+  color: var(--blue);
+  font-weight: 500;
+  margin-bottom: 11.5px;
+}
