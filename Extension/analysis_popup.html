@@ -39,6 +39,22 @@
     </nav>
 
     <main class="tab-content">
+      <!-- Loading screen -->
+      <div id="analysis-loading" hidden>
+        <div class="loading-content">
+          <div class="loading-spinner"></div>
+      
+          <h3 id="loading-title">Analyzing your email...</h3>
+      
+          <p id="loading-message">
+            Please wait while PhishCatcher reviews the email.
+          </p>
+      
+          <p id="analysis-error" hidden>
+            Analysis couldn't be completed. Please try again.
+          </p>
+        </div>
+      </div>
 
       <!-- Findings tab -->
       <section class="tab-panel active" id="findings">

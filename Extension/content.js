@@ -248,6 +248,18 @@ function phishcatcherHighlightLinks(flagged) {
     }
 
     console.log("Analyzing email:", messageId);
+    // Tell the PhishCatcher panel a new analysis is starting.
+    phishCatcherPanel?.contentWindow?.postMessage(
+      { type: "PHISHCATCHER_ANALYSIS_LOADING" },
+      "*"
+    );
+    // Tell the analysis panel to show its loading screen.
+    if (phishCatcherPanel?.contentWindow) {
+      phishCatcherPanel.contentWindow.postMessage(
+        { type: "PHISHCATCHER_ANALYSIS_LOADING" },
+        "*"
+      );
+    }
 
     chrome.runtime.sendMessage(
       { action: "ANALYZE_EMAIL", messageId: messageId },
@@ -255,6 +267,27 @@ function phishcatcherHighlightLinks(flagged) {
         // The backend results come back here (background.js has to call sendResponse).
         if (chrome.runtime.lastError) {
           console.log("PhishCatcher: no response from background.js:", chrome.runtime.lastError.message);
+        
+          phishCatcherPanel?.contentWindow?.postMessage(
+            {
+              type: "PHISHCATCHER_ANALYSIS_ERROR",
+              error: "Analysis couldn't be completed. Please try again."
+            },
+            "*"
+          );
+        
+          return;
+        }
+        
+        if (response?.success === false) {
+          phishCatcherPanel?.contentWindow?.postMessage(
+            {
+              type: "PHISHCATCHER_ANALYSIS_ERROR",
+              error: response.error || "Analysis couldn't be completed. Please try again."
+            },
+            "*"
+          );
+        
           return;
         }
 

@@ -128,8 +128,21 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "ANALYZE_EMAIL") {
     console.log("Received Gmail API message ID:", message.messageId);
-    // Reply to content.js with the backend result once it is ready
-    analyzeEmail(message.messageId).then((result) => sendResponse(result));
-    return true; // keeps the message channel open for the async reply
+
+    // Reply to content.js with the backend result once it is ready.
+    analyzeEmail(message.messageId)
+      .then((result) => {
+        sendResponse({ success: true, ...result });
+      })
+      .catch((error) => {
+        console.error("PhishCatcher analysis failed:", error);
+
+        sendResponse({
+          success: false,
+          error: error.message || "Analysis could not be completed."
+        });
+      });
+
+    return true;
   }
 });

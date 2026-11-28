@@ -80,9 +80,45 @@ function showRemediation(remediation) {
 
 /* Receive email headers from content.js */
 window.addEventListener("message", (event) => {
+
+  // Show loading screen when a new analysis starts.
+  if (event.data?.type === "PHISHCATCHER_ANALYSIS_LOADING") {
+    const loadingScreen = document.getElementById("analysis-loading");
+  
+    loadingScreen.hidden = false;
+  
+    // Reset the loading screen for a new analysis.
+    document.querySelector(".loading-spinner").hidden = false;
+    document.getElementById("loading-title").textContent = "Analyzing your email...";
+    document.getElementById("loading-message").hidden = false;
+    document.getElementById("analysis-error").hidden = true;
+  
+    return;
+  }
+  // Show an error if analysis fails.
+  if (event.data?.type === "PHISHCATCHER_ANALYSIS_ERROR") {
+    const loadingScreen = document.getElementById("analysis-loading");
+
+    loadingScreen.hidden = false;
+
+    document.querySelector(".loading-spinner").hidden = true;
+    document.getElementById("loading-title").textContent = "Analysis failed";
+    document.getElementById("loading-message").hidden = true;
+
+    const errorMessage = document.getElementById("analysis-error");
+    errorMessage.textContent = event.data.error;
+    errorMessage.hidden = false;
+
+    return;
+  }
+
+  // Only continue when analysis results arrive.
   if (event.data?.type !== "PHISHCATCHER_ANALYSIS_RESULT") {
     return;
   }
+
+  // Hide loading screen when results arrive.
+  document.getElementById("analysis-loading").hidden = true;
 
   showRemediation(event.data.remediation);
 
